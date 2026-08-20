@@ -18,7 +18,6 @@
                         <p class="header-sub" data-i18n="brandSub">为 Nullscaper 生成更好的大厅标题</p>
                     </div>
                 </div>
-                <!-- 语言切换按钮 - 新样式 -->
                 <button class="lang-toggle" id="langToggle" aria-label="切换语言" title="切换语言 / Toggle Language">
                     <span class="lang-icon">🌐</span>
                     <span class="lang-text" id="langLabel">中文</span>
@@ -28,29 +27,37 @@
 
         <main class="app-main">
 
+            <!-- 顶部：文本输入 + 分段 -->
+            <section class="text-section">
+                <div class="text-section-head">
+                    <label class="section-label" for="textInput" data-i18n="textLabel">文本内容</label>
+                    <span class="input-char-count" id="charCount">9</span>
+                </div>
+                <input type="text" id="textInput" class="input-text" value="ENDURANCE"
+                    data-i18n-placeholder="textPlaceholder" placeholder="输入标题，用 || 分隔分段..." />
+                <p class="text-hint" data-i18n="textHint">使用 || 分隔多个分段，每个分段可单独设置样式</p>
+                <div class="segment-tabs" id="segmentTabs"></div>
+            </section>
+
             <!-- 左侧控制面板 -->
             <aside class="control-panel">
-
-                <!-- 文本输入 -->
-                <section class="control-section">
-                    <label class="section-label" for="textInput" data-i18n="textLabel">文本内容</label>
-                    <div class="input-group">
-                        <input type="text" id="textInput" class="input-text" value="ENDURANCE" placeholder="输入要渐变的文本..." data-i18n-placeholder="textPlaceholder" />
-                        <span class="input-char-count" id="charCount">9</span>
-                    </div>
-                </section>
 
                 <!-- 文本颜色 -->
                 <section class="control-section color-section">
                     <label class="section-label" data-i18n="textColorLabel">文本颜色</label>
                     <div class="color-pickers">
-                        <div class="color-picker-group">
-                            <label class="color-label" for="textStartColor" data-i18n="startColorLabel">起始色</label>
+                        <div class="color-picker-group" id="textStartColorGroup">
+                            <label class="color-label" id="textStartColorLabel" for="textStartColor" data-i18n="startColorLabel">起始色</label>
                             <input type="color" id="textStartColor" class="color-picker" value="#87292B" />
                             <input type="text" class="color-hex" id="textStartColorHex" value="#87292B" />
                         </div>
-                        <div class="color-picker-group">
-                            <label class="color-label" for="textEndColor" data-i18n="endColorLabel">结束色</label>
+                        <div class="color-picker-group" id="textMidColorGroup" style="display:none;">
+                            <label class="color-label" id="textMidColorLabel" for="textMidColor" data-i18n="midColorLabel">中间色</label>
+                            <input type="color" id="textMidColor" class="color-picker" value="#B03A40" />
+                            <input type="text" class="color-hex" id="textMidColorHex" value="#B03A40" />
+                        </div>
+                        <div class="color-picker-group" id="textEndColorGroup">
+                            <label class="color-label" id="textEndColorLabel" for="textEndColor" data-i18n="endColorLabel">结束色</label>
                             <input type="color" id="textEndColor" class="color-picker" value="#F54B4E" />
                             <input type="text" class="color-hex" id="textEndColorHex" value="#F54B4E" />
                         </div>
@@ -59,7 +66,9 @@
                     <div class="mode-button-group" id="textModeGroup">
                         <button class="mode-btn" data-mode="solid" data-i18n="solid">纯色</button>
                         <button class="mode-btn active" data-mode="gradient" data-i18n="gradient">渐变</button>
+                        <button class="mode-btn" data-mode="three" data-i18n="three">三色渐变</button>
                         <button class="mode-btn" data-mode="rainbow" data-i18n="rainbow">🌈 彩虹</button>
+                        <button class="mode-btn" data-mode="edge" data-i18n="edge">两边→中间</button>
                     </div>
                 </section>
 
@@ -75,13 +84,18 @@
                     </div>
                     <div class="stroke-color-area" id="strokeColorArea" style="opacity:0.4; pointer-events:none;">
                         <div class="color-pickers">
-                            <div class="color-picker-group">
-                                <label class="color-label" for="strokeStartColor" data-i18n="startColorLabel">起始色</label>
+                            <div class="color-picker-group" id="strokeStartColorGroup">
+                                <label class="color-label" id="strokeStartColorLabel" for="strokeStartColor" data-i18n="startColorLabel">起始色</label>
                                 <input type="color" id="strokeStartColor" class="color-picker" value="#87292B" />
                                 <input type="text" class="color-hex" id="strokeStartColorHex" value="#87292B" />
                             </div>
-                            <div class="color-picker-group">
-                                <label class="color-label" for="strokeEndColor" data-i18n="endColorLabel">结束色</label>
+                            <div class="color-picker-group" id="strokeMidColorGroup" style="display:none;">
+                                <label class="color-label" id="strokeMidColorLabel" for="strokeMidColor" data-i18n="midColorLabel">中间色</label>
+                                <input type="color" id="strokeMidColor" class="color-picker" value="#B03A40" />
+                                <input type="text" class="color-hex" id="strokeMidColorHex" value="#B03A40" />
+                            </div>
+                            <div class="color-picker-group" id="strokeEndColorGroup">
+                                <label class="color-label" id="strokeEndColorLabel" for="strokeEndColor" data-i18n="endColorLabel">结束色</label>
                                 <input type="color" id="strokeEndColor" class="color-picker" value="#F54B4E" />
                                 <input type="text" class="color-hex" id="strokeEndColorHex" value="#F54B4E" />
                             </div>
@@ -90,7 +104,9 @@
                         <div class="mode-button-group" id="strokeModeGroup">
                             <button class="mode-btn" data-mode="solid" data-i18n="solid">纯色</button>
                             <button class="mode-btn active" data-mode="gradient" data-i18n="gradient">渐变</button>
+                            <button class="mode-btn" data-mode="three" data-i18n="three">三色渐变</button>
                             <button class="mode-btn" data-mode="rainbow" data-i18n="rainbow">🌈 彩虹</button>
+                            <button class="mode-btn" data-mode="edge" data-i18n="edge">两边→中间</button>
                         </div>
                         <div class="stroke-params">
                             <div class="stroke-row">
@@ -201,132 +217,6 @@
         </footer>
 
     </div>
-
-    <!-- 语言切换脚本 -->
-    <script>
-        (function() {
-            // 翻译字典
-            const i18n = {
-                zh: {
-                    brandTitle: 'Nullscape Lobby Title Generator',
-                    brandSub: '为 Nullscaper 生成更好的大厅标题',
-                    textLabel: '文本内容',
-                    textPlaceholder: '输入要渐变的文本...',
-                    textColorLabel: '文本颜色',
-                    startColorLabel: '起始色',
-                    endColorLabel: '结束色',
-                    solid: '纯色',
-                    gradient: '渐变',
-                    rainbow: '🌈 彩虹',
-                    strokeSettings: '描边设置',
-                    enable: '启用',
-                    thickness: '厚度',
-                    opacity: '透明度',
-                    fontLabel: '字体',
-                    textStyleLabel: '文本样式',
-                    bold: '粗体',
-                    italic: '斜体',
-                    underline: '下划线',
-                    strikethrough: '删除线',
-                    previewTitle: '预览',
-                    codeTitle: '生成的 Rich Text 代码',
-                    copyBtn: '📋 复制',
-                    resetBtn: '↺ 重置',
-                    presetTitle: '预设示例',
-                    presetBadge: '点击加载',
-                    langLabel: '中文'
-                },
-                en: {
-                    brandTitle: 'Nullscape Lobby Title Generator',
-                    brandSub: 'Generate better lobby titles for Nullscaper',
-                    textLabel: 'Text',
-                    textPlaceholder: 'Enter text to apply gradient...',
-                    textColorLabel: 'Text Color',
-                    startColorLabel: 'Start Color',
-                    endColorLabel: 'End Color',
-                    solid: 'Solid',
-                    gradient: 'Gradient',
-                    rainbow: '🌈 Rainbow',
-                    strokeSettings: 'Stroke Settings',
-                    enable: 'Enable',
-                    thickness: 'Thickness',
-                    opacity: 'Opacity',
-                    fontLabel: 'Font',
-                    textStyleLabel: 'Text Style',
-                    bold: 'Bold',
-                    italic: 'Italic',
-                    underline: 'Underline',
-                    strikethrough: 'Strikethrough',
-                    previewTitle: 'Preview',
-                    codeTitle: 'Generated Rich Text Code',
-                    copyBtn: '📋 Copy',
-                    resetBtn: '↺ Reset',
-                    presetTitle: 'Presets',
-                    presetBadge: 'Click to load',
-                    langLabel: 'English'
-                }
-            };
-
-            let currentLang = 'zh';
-            const langToggle = document.getElementById('langToggle');
-            const langLabel = document.getElementById('langLabel');
-
-            function setLanguage(lang) {
-                currentLang = lang;
-                const dict = i18n[lang];
-
-                document.querySelectorAll('[data-i18n]').forEach(el => {
-                    const key = el.getAttribute('data-i18n');
-                    if (dict[key] !== undefined) {
-                        el.textContent = dict[key];
-                    }
-                });
-
-                document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-                    const key = el.getAttribute('data-i18n-placeholder');
-                    if (dict[key] !== undefined) {
-                        el.placeholder = dict[key];
-                    }
-                });
-
-                if (langLabel) {
-                    langLabel.textContent = dict.langLabel || (lang === 'zh' ? '中文' : 'English');
-                }
-
-                document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-
-                try {
-                    localStorage.setItem('preferredLang', lang);
-                } catch (e) {}
-            }
-
-            function toggleLanguage() {
-                const nextLang = currentLang === 'zh' ? 'en' : 'zh';
-                // 点击时添加微小的缩放反馈
-                if (langToggle) {
-                    langToggle.style.transition = 'transform 0.15s cubic-bezier(0.2, 0, 0, 1)';
-                    langToggle.style.transform = 'scale(0.92)';
-                    setTimeout(() => {
-                        langToggle.style.transform = 'scale(1)';
-                    }, 150);
-                }
-                setLanguage(nextLang);
-            }
-
-            let savedLang = 'zh';
-            try {
-                const stored = localStorage.getItem('preferredLang');
-                if (stored === 'en' || stored === 'zh') {
-                    savedLang = stored;
-                }
-            } catch (e) {}
-            setLanguage(savedLang);
-
-            if (langToggle) {
-                langToggle.addEventListener('click', toggleLanguage);
-            }
-        })();
-    </script>
 
     <script src="script.js"></script>
 </body>
