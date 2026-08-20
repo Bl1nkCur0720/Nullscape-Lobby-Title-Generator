@@ -227,9 +227,18 @@ FONT_LIST.forEach(f => {
   const opt = document.createElement('option');
   opt.value = f.family;
   opt.textContent = f.label;
+  // 下拉选项内直接用真实字体预览（仅影响网页 UI，不改变生成的 Rich Text）
+  opt.style.fontFamily = `'${f.family}', 'Segoe UI', sans-serif`;
   fontSelect.appendChild(opt);
 });
 fontSelect.value = 'BuilderSans';
+
+// 让下拉框本身及选中项跟随当前字体显示
+function applyFontSelectPreview() {
+  const family = fontSelect.value;
+  fontSelect.style.fontFamily = `'${family}', 'Segoe UI', sans-serif`;
+  preloadFontFamily(family);
+}
 
 // ===== 颜色辅助函数 =====
 function hexToRgb(hex) {
@@ -383,6 +392,18 @@ function convertStrokeForPreview(html) {
   });
 }
 
+// ===== 将 font 标签的官方 family 路径转换为 CSS 字体（仅用于预览） =====
+// 仅做渲染层转换：生成的 Rich Text 代码中 family 仍保持
+// rbxasset://fonts/families/<Family>.json 官方格式不变。
+function convertFontForPreview(html) {
+  return html
+    .replace(
+      /<font color="([^"]*)"\s+family="rbxasset:\/\/fonts\/families\/([^"]+)\.json">/g,
+      (match, color, family) => `<span style="color:${color}; font-family:'${family}';">`
+    )
+    .replace(/<\/font>/g, '</span>');
+}
+
 // ===== 分段拆分（仅 || 触发分段，单个 | 不拆分） =====
 function splitText(raw) {
   return raw.split('||');
@@ -451,6 +472,7 @@ function loadSegmentToControls(i) {
   strokeTransparencyVal.textContent = s.strokeTrans;
 
   fontSelect.value = s.font || 'BuilderSans';
+  applyFontSelectPreview();
   optBold.checked = s.bold;
   optItalic.checked = s.italic;
   optUnderline.checked = s.underline;
@@ -557,7 +579,7 @@ function selectSegment(i) {
 // ===== 输出渲染 =====
 function renderOutput() {
   const full = segments.map(buildSegmentHtml).join('');
-  const previewHtml = convertStrokeForPreview(full);
+  const previewHtml = convertStrokeForPreview(convertFontForPreview(full));
   previewRender.innerHTML = previewHtml || '&nbsp;';
   codeContent.textContent = full;
 }
@@ -718,6 +740,7 @@ setupModeGroup('strokeModeGroup', 'stroke');
 // 字体
 fontSelect.addEventListener('change', () => {
   readControlsToSegment(activeSegment);
+  applyFontSelectPreview();
   updateOutput();
 });
 
