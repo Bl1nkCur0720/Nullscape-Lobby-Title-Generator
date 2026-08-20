@@ -1,0 +1,240 @@
+﻿family,face,weight,style,source,file,bytes,status
+AccanthisADFStd,(manifest),,,local-json,AccanthisADFStd.json,180,OK
+AccanthisADFStd,Regular,400,normal,local-bundled,AccanthisADFStd-Regular.otf,51728,OK
+AmaticSC,(manifest),,,local-json,AmaticSC.json,284,OK
+AmaticSC,Regular,400,normal,local-bundled,AmaticSC-Regular.ttf,142164,OK
+AmaticSC,Bold,700,normal,local-bundled,AmaticSC-Bold.ttf,146348,OK
+Arimo,(manifest),,,local-json,Arimo.json,965,OK
+Arimo,Regular,400,normal,local-bundled,Arimo-Regular.ttf,317652,OK
+Arimo,Bold,700,normal,local-bundled,Arimo-Bold.ttf,318184,OK
+Arimo,Semi Bold,600,normal,assetid-16658204806,Arimo-SemiBold.ttf,321660,OK
+Arimo,Italic,400,italic,assetid-16658203384,Arimo-Italic.ttf,339884,OK
+Arimo,Semi Bold Italic,600,italic,assetid-16658205285,Arimo-SemiBoldItalic.ttf,345020,OK
+Arimo,Medium,500,normal,assetid-16658205823,Arimo-Medium.ttf,320664,OK
+Arimo,Medium Italic,500,italic,assetid-16658204548,Arimo-MediumItalic.ttf,344472,OK
+Arimo,Bold Italic,700,italic,assetid-16658202951,Arimo-BoldItalic.ttf,341288,OK
+Balthazar,(manifest),,,local-json,Balthazar.json,166,OK
+Balthazar,Regular,400,normal,local-bundled,Balthazar-Regular.ttf,28224,OK
+Bangers,(manifest),,,local-json,Bangers.json,162,OK
+Bangers,Regular,400,normal,local-bundled,Bangers-Regular.ttf,95664,OK
+BuilderExtended,(manifest),,,local-json,BuilderExtended.json,674,OK
+BuilderExtended,Regular,400,normal,local-bundled,BuilderExtended-Regular.otf,78708,OK
+BuilderExtended,Semi Bold,600,normal,local-bundled,BuilderExtended-SemiBold.otf,78520,OK
+BuilderExtended,Bold,700,normal,local-bundled,BuilderExtended-Bold.otf,79504,OK
+BuilderExtended,Light,300,normal,assetid-16658206024,BuilderExtended-Light.otf,77000,OK
+BuilderExtended,Extra Bold,800,normal,assetid-16658204300,BuilderExtended-ExtraBold.otf,78904,OK
+BuilderMono,(manifest),,,local-json,BuilderMono.json,417,OK
+BuilderMono,Light,300,normal,local-bundled,BuilderMono-Light.otf,59048,OK
+BuilderMono,Regular,400,normal,local-bundled,BuilderMono-Regular.otf,58864,OK
+BuilderMono,Bold,700,normal,local-bundled,BuilderMono-Bold.otf,62992,OK
+BuilderSans,(manifest),,,local-json,BuilderSans.json,885,OK
+BuilderSans,Regular,400,normal,local-bundled,BuilderSans-Regular.otf,77352,OK
+BuilderSans,Medium,500,normal,local-bundled,BuilderSans-Medium.otf,77856,OK
+BuilderSans,Bold,700,normal,local-bundled,BuilderSans-Bold.otf,77840,OK
+BuilderSans,Extra Bold,800,normal,local-bundled,BuilderSans-ExtraBold.otf,77504,OK
+BuilderSans,Semi Bold,600,normal,assetid-16480736149,BuilderSans-SemiBold.otf,78300,OK
+BuilderSans,Light,300,normal,assetid-16480736281,BuilderSans-Light.otf,78124,OK
+BuilderSans,Thin,100,normal,assetid-16480735997,BuilderSans-Thin.otf,75288,OK
+ComicNeueAngular,(manifest),,,local-json,ComicNeueAngular.json,177,OK
+ComicNeueAngular,Bold,400,normal,local-bundled,ComicNeue-Angular-Bold.ttf,62916,OK
+Creepster,(manifest),,,local-json,Creepster.json,166,OK
+Creepster,Regular,400,normal,local-bundled,Creepster-Regular.ttf,61368,OK
+DenkOne,(manifest),,,local-json,DenkOne.json,163,OK
+DenkOne,Regular,400,normal,local-bundled,DenkOne-Regular.ttf,44016,OK
+Fondamento,(manifest),,,local-json,Fondamento.json,293,OK
+Fondamento,Regular,400,normal,local-bundled,Fondamento-Regular.ttf,84160,OK
+Fondamento,Italic,400,italic,local-bundled,Fondamento-Italic.ttf,64716,OK
+FredokaOne,(manifest),,,local-json,FredokaOne.json,169,OK
+FredokaOne,Regular,400,normal,local-bundled,FredokaOne-Regular.ttf,42452,OK
+GrenzeGotisch,(manifest),,,local-json,GrenzeGotisch.json,1077,OK
+GrenzeGotisch,Regular,400,normal,local-bundled,GrenzeGotisch-Regular.ttf,91596,OK
+GrenzeGotisch,Bold,700,normal,local-bundled,GrenzeGotisch-Bold.ttf,91808,OK
+GrenzeGotisch,Thin,100,normal,assetid-8075131149,GrenzeGotisch-Thin.ttf,94476,OK
+GrenzeGotisch,Light,300,normal,assetid-8075126665,GrenzeGotisch-Light.ttf,94772,OK
+GrenzeGotisch,Medium,500,normal,assetid-8075128072,GrenzeGotisch-Medium.ttf,94728,OK
+GrenzeGotisch,Extra Light,200,normal,assetid-8075125354,GrenzeGotisch-ExtraLight.ttf,94712,OK
+GrenzeGotisch,Extra Bold,800,normal,assetid-8075124119,GrenzeGotisch-ExtraBold.ttf,94936,OK
+GrenzeGotisch,Semi Bold,600,normal,assetid-8075129532,GrenzeGotisch-SemiBold.ttf,94868,OK
+GrenzeGotisch,Black,900,normal,assetid-8075122560,GrenzeGotisch-Black.ttf,94892,OK
+Guru,(manifest),,,local-json,Guru.json,156,OK
+Guru,Regular,400,normal,local-bundled,Guru-Regular.otf,695888,OK
+HighwayGothic,(manifest),,,local-json,HighwayGothic.json,161,OK
+HighwayGothic,Regular,400,normal,local-bundled,HWYGOTH.ttf,53012,OK
+Inconsolata,(manifest),,,local-json,Inconsolata.json,948,OK
+Inconsolata,Regular,400,normal,local-bundled,Inconsolata-Regular.ttf,80456,OK
+Inconsolata,Medium,500,normal,assetid-8075138871,Inconsolata-Medium.ttf,98304,OK
+Inconsolata,Bold,700,normal,assetid-8075133734,Inconsolata-Bold.ttf,98260,OK
+Inconsolata,Semi Bold,600,normal,assetid-8075152559,Inconsolata-SemiBold.ttf,98400,OK
+Inconsolata,Extra Light,200,normal,assetid-8075136215,Inconsolata-ExtraLight.ttf,98108,OK
+Inconsolata,Light,300,normal,assetid-8075137743,Inconsolata-Light.ttf,97956,OK
+Inconsolata,Black,900,normal,assetid-8075132286,Inconsolata-Black.ttf,98048,OK
+Inconsolata,Extra Bold,800,normal,assetid-8075135080,Inconsolata-ExtraBold.ttf,98268,OK
+IndieFlower,(manifest),,,local-json,IndieFlower.json,171,OK
+IndieFlower,Regular,400,normal,local-bundled,IndieFlower-Regular.ttf,55300,OK
+JosefinSans,(manifest),,,local-json,JosefinSans.json,1649,OK
+JosefinSans,Regular,400,normal,local-bundled,JosefinSans-Regular.ttf,58548,OK
+JosefinSans,Extra Light,200,normal,assetid-8075158344,JosefinSans-ExtraLight.ttf,59288,OK
+JosefinSans,Light,300,normal,assetid-8075162641,JosefinSans-Light.ttf,59308,OK
+JosefinSans,Thin,100,normal,assetid-8075169096,JosefinSans-Thin.ttf,59124,OK
+JosefinSans,Extra Light Italic,200,italic,assetid-8075159689,JosefinSans-ExtraLightItalic.ttf,62924,OK
+JosefinSans,Thin Italic,100,italic,assetid-8075170443,JosefinSans-ThinItalic.ttf,62672,OK
+JosefinSans,Light Italic,300,italic,assetid-8075163642,JosefinSans-LightItalic.ttf,62884,OK
+JosefinSans,Medium Italic,500,italic,assetid-8075165536,JosefinSans-MediumItalic.ttf,63036,OK
+JosefinSans,Medium,500,normal,assetid-8075164545,JosefinSans-Medium.ttf,59328,OK
+JosefinSans,Italic,400,italic,assetid-8075161226,JosefinSans-Italic.ttf,62884,OK
+JosefinSans,Semi Bold,600,normal,assetid-8075166660,JosefinSans-SemiBold.ttf,59324,OK
+JosefinSans,Bold Italic,700,italic,assetid-8075155824,JosefinSans-BoldItalic.ttf,62796,OK
+JosefinSans,Semi Bold Italic,600,italic,assetid-8075167921,JosefinSans-SemiBoldItalic.ttf,63048,OK
+JosefinSans,Bold,700,normal,assetid-8075153954,JosefinSans-Bold.ttf,59160,OK
+Jura,(manifest),,,local-json,Jura.json,596,OK
+Jura,Regular,400,normal,local-bundled,Jura-Regular.ttf,101928,OK
+Jura,Semi Bold,600,normal,assetid-8075175707,Jura-SemiBold.ttf,154344,OK
+Jura,Medium,500,normal,assetid-8075174061,Jura-Medium.ttf,154332,OK
+Jura,Bold,700,normal,assetid-8075171571,Jura-Bold.ttf,154036,OK
+Jura,Light,300,normal,assetid-8075172942,Jura-Light.ttf,154152,OK
+Kalam,(manifest),,,local-json,Kalam.json,375,OK
+Kalam,Regular,400,normal,local-bundled,Kalam-Regular.ttf,427336,OK
+Kalam,Bold,700,normal,assetid-8075176745,Kalam-Bold.ttf,460872,OK
+Kalam,Light,300,normal,assetid-8075177780,Kalam-Light.ttf,437488,OK
+LuckiestGuy,(manifest),,,local-json,LuckiestGuy.json,171,OK
+LuckiestGuy,Regular,400,normal,local-bundled,LuckiestGuy-Regular.ttf,58292,OK
+Merriweather,(manifest),,,local-json,Merriweather.json,972,OK
+Merriweather,Regular,400,normal,local-bundled,Merriweather-Regular.ttf,149092,OK
+Merriweather,Italic,400,italic,local-bundled,Merriweather-Italic.ttf,142548,OK
+Merriweather,Bold Italic,700,italic,assetid-8075183147,Merriweather-BoldItalic.ttf,143736,OK
+Merriweather,Bold,700,normal,assetid-8075182406,Merriweather-Bold.ttf,141964,OK
+Merriweather,Light Italic,300,italic,assetid-8075185123,Merriweather-LightItalic.ttf,141956,OK
+Merriweather,Black,900,normal,assetid-8075179098,Merriweather-Black.ttf,141624,OK
+Merriweather,Light,300,normal,assetid-8075184168,Merriweather-Light.ttf,148100,OK
+Merriweather,Black Italic,900,italic,assetid-8075181261,Merriweather-BlackItalic.ttf,142520,OK
+Michroma,(manifest),,,local-json,Michroma.json,164,OK
+Michroma,Regular,400,normal,local-bundled,Michroma-Regular.ttf,62972,OK
+Montserrat,(manifest),,,local-json,Montserrat.json,2162,OK
+Montserrat,Regular,400,normal,local-bundled,Montserrat-Regular.ttf,197976,OK
+Montserrat,Medium,500,normal,local-bundled,Montserrat-Medium.ttf,198104,OK
+Montserrat,Bold,700,normal,local-bundled,Montserrat-Bold.ttf,198072,OK
+Montserrat,Black,900,normal,local-bundled,Montserrat-Black.ttf,197888,OK
+Montserrat,Light,300,normal,assetid-11598118107,Montserrat-Light.ttf,198072,OK
+Montserrat,Thin Italic,100,italic,assetid-11598120684,Montserrat-ThinItalic.ttf,201924,OK
+Montserrat,Extra Light Italic,200,italic,assetid-11598116110,Montserrat-ExtraLightItalic.ttf,202364,OK
+Montserrat,Extra Light,200,normal,assetid-11598119328,Montserrat-ExtraLight.ttf,197784,OK
+Montserrat,Thin,100,normal,assetid-11598116985,Montserrat-Thin.ttf,197464,OK
+Montserrat,Light Italic,300,italic,assetid-11598116400,Montserrat-LightItalic.ttf,202524,OK
+Montserrat,Italic,400,italic,assetid-11598117311,Montserrat-Italic.ttf,202380,OK
+Montserrat,Bold Italic,700,italic,assetid-11598117769,Montserrat-BoldItalic.ttf,202492,OK
+Montserrat,Semi Bold Italic,600,italic,assetid-11598117539,Montserrat-SemiBoldItalic.ttf,202660,OK
+Montserrat,Medium Italic,500,italic,assetid-11598115824,Montserrat-MediumItalic.ttf,202492,OK
+Montserrat,Extra Bold Italic,800,italic,assetid-11598118921,Montserrat-ExtraBoldItalic.ttf,202460,OK
+Montserrat,Extra Bold,800,normal,assetid-11598118540,Montserrat-ExtraBold.ttf,198148,OK
+Montserrat,Semi Bold,600,normal,assetid-11598119872,Montserrat-SemiBold.ttf,198204,OK
+Montserrat,Black Italic,900,italic,assetid-11598119154,Montserrat-BlackItalic.ttf,202304,OK
+Nunito,(manifest),,,local-json,Nunito.json,1648,OK
+Nunito,Regular,400,normal,local-bundled,Nunito-Regular.ttf,166700,OK
+Nunito,Extra Light,200,normal,assetid-8075194140,Nunito-ExtraLight.ttf,149904,OK
+Nunito,Italic,400,italic,assetid-8075202496,Nunito-Italic.ttf,157328,OK
+Nunito,Light,300,normal,assetid-8075203475,Nunito-Light.ttf,151364,OK
+Nunito,Bold,700,normal,assetid-8075189006,Nunito-Bold.ttf,152748,OK
+Nunito,Extra Light Italic,200,italic,assetid-8075197713,Nunito-ExtraLightItalic.ttf,154336,OK
+Nunito,Light Italic,300,italic,assetid-8075204633,Nunito-LightItalic.ttf,156080,OK
+Nunito,Semi Bold,600,normal,assetid-8075206156,Nunito-SemiBold.ttf,153116,OK
+Nunito,Black,900,normal,assetid-8075186391,Nunito-Black.ttf,155864,OK
+Nunito,Semi Bold Italic,600,italic,assetid-8075207679,Nunito-SemiBoldItalic.ttf,158672,OK
+Nunito,Bold Italic,700,italic,assetid-8075190657,Nunito-BoldItalic.ttf,159820,OK
+Nunito,Extra Bold,800,normal,assetid-8075191639,Nunito-ExtraBold.ttf,154852,OK
+Nunito,Extra Bold Italic,800,italic,assetid-8075193085,Nunito-ExtraBoldItalic.ttf,160700,OK
+Nunito,Black Italic,900,italic,assetid-8075188191,Nunito-BlackItalic.ttf,160280,OK
+Oswald,(manifest),,,local-json,Oswald.json,724,OK
+Oswald,Regular,400,normal,local-bundled,Oswald-Regular.ttf,91400,OK
+Oswald,Bold,700,normal,local-bundled,Oswald-Bold.ttf,91676,OK
+Oswald,Medium,500,normal,assetid-8075211253,Oswald-Medium.ttf,91648,OK
+Oswald,Extra Light,200,normal,assetid-8075208793,Oswald-ExtraLight.ttf,91364,OK
+Oswald,Light,300,normal,assetid-8075210157,Oswald-Light.ttf,91500,OK
+Oswald,Semi Bold,600,normal,assetid-8075212180,Oswald-SemiBold.ttf,91700,OK
+PatrickHand,(manifest),,,local-json,PatrickHand.json,171,OK
+PatrickHand,Regular,400,normal,local-bundled,PatrickHand-Regular.ttf,212112,OK
+PermanentMarker,(manifest),,,local-json,PermanentMarker.json,179,OK
+PermanentMarker,Regular,400,normal,local-bundled,PermanentMarker-Regular.ttf,73620,OK
+PressStart2P,(manifest),,,local-json,PressStart2P.json,174,OK
+PressStart2P,Regular,400,normal,local-bundled,PressStart2P-Regular.ttf,66432,OK
+Roboto,(manifest),,,local-json,Roboto.json,1413,OK
+Roboto,Regular,400,normal,local-bundled,Roboto-Regular.ttf,171272,OK
+Roboto,Italic,400,italic,local-bundled,Roboto-Italic.ttf,173516,OK
+Roboto,Bold,700,normal,local-bundled,Roboto-Bold.ttf,170348,OK
+Roboto,Light,300,normal,assetid-8075217365,Roboto-Light.ttf,167000,OK
+Roboto,Light Italic,300,italic,assetid-8075218609,Roboto-LightItalic.ttf,173172,OK
+Roboto,Medium,500,normal,assetid-8075219809,Roboto-Medium.ttf,168644,OK
+Roboto,Thin,100,normal,assetid-8075221981,Roboto-Thin.ttf,168488,OK
+Roboto,Thin Italic,100,italic,assetid-8075223041,Roboto-ThinItalic.ttf,172860,OK
+Roboto,Black,900,normal,assetid-8075213353,Roboto-Black.ttf,168060,OK
+Roboto,Medium Italic,500,italic,assetid-8075220927,Roboto-MediumItalic.ttf,173416,OK
+Roboto,Bold Italic,700,italic,assetid-8075215812,Roboto-BoldItalic.ttf,171508,OK
+Roboto,Black Italic,900,italic,assetid-8075214707,Roboto-BlackItalic.ttf,174108,OK
+RobotoCondensed,(manifest),,,local-json,RobotoCondensed.json,737,OK
+RobotoCondensed,Regular,400,normal,local-bundled,RobotoCondensed-Regular.ttf,169848,OK
+RobotoCondensed,Italic,400,italic,assetid-8075226282,RobotoCondensed-Italic.ttf,174736,OK
+RobotoCondensed,Bold Italic,700,italic,assetid-8075225339,RobotoCondensed-BoldItalic.ttf,175420,OK
+RobotoCondensed,Bold,700,normal,assetid-8075224057,RobotoCondensed-Bold.ttf,169352,OK
+RobotoCondensed,Light,300,normal,assetid-8075227470,RobotoCondensed-Light.ttf,167568,OK
+RobotoCondensed,Light Italic,300,italic,assetid-8075228979,RobotoCondensed-LightItalic.ttf,174908,OK
+RobotoMono,(manifest),,,local-json,RobotoMono.json,1647,OK
+RobotoMono,Regular,400,normal,local-bundled,RobotoMono-Regular.ttf,86908,OK
+RobotoMono,Thin Italic,100,italic,assetid-8075245442,RobotoMono-ThinItalic.ttf,93056,OK
+RobotoMono,Light,300,normal,assetid-8075237774,RobotoMono-Light.ttf,87592,OK
+RobotoMono,Extra Light Italic,200,italic,assetid-8075235591,RobotoMono-ExtraLightItalic.ttf,93408,OK
+RobotoMono,Extra Light,200,normal,assetid-8075234397,RobotoMono-ExtraLight.ttf,87788,OK
+RobotoMono,Thin,100,normal,assetid-8075243607,RobotoMono-Thin.ttf,87872,OK
+RobotoMono,Medium Italic,500,italic,assetid-8075240746,RobotoMono-MediumItalic.ttf,93948,OK
+RobotoMono,Italic,400,italic,assetid-8075236911,RobotoMono-Italic.ttf,93904,OK
+RobotoMono,Semi Bold,600,normal,assetid-8075241600,RobotoMono-SemiBold.ttf,87076,OK
+RobotoMono,Light Italic,300,italic,assetid-8075238807,RobotoMono-LightItalic.ttf,93760,OK
+RobotoMono,Semi Bold Italic,600,italic,assetid-8075242504,RobotoMono-SemiBoldItalic.ttf,93940,OK
+RobotoMono,Medium,500,normal,assetid-8075239762,RobotoMono-Medium.ttf,86820,OK
+RobotoMono,Bold Italic,700,italic,assetid-8075231017,RobotoMono-BoldItalic.ttf,94148,OK
+RobotoMono,Bold,700,normal,assetid-8075229982,RobotoMono-Bold.ttf,87008,OK
+RomanAntique,(manifest),,,local-json,RomanAntique.json,165,OK
+RomanAntique,Regular,400,normal,local-bundled,RomanAntique.otf,268000,OK
+Sarpanch,(manifest),,,local-json,Sarpanch.json,729,OK
+Sarpanch,Regular,400,normal,local-bundled,Sarpanch-Regular.ttf,276380,OK
+Sarpanch,Bold,700,normal,local-bundled,Sarpanch-Bold.ttf,278336,OK
+Sarpanch,Medium,500,normal,assetid-8075248692,Sarpanch-Medium.ttf,278704,OK
+Sarpanch,Black,900,normal,assetid-8075246651,Sarpanch-Black.ttf,285832,OK
+Sarpanch,Extra Bold,800,normal,assetid-8075247756,Sarpanch-ExtraBold.ttf,285460,OK
+Sarpanch,Semi Bold,600,normal,assetid-8075249667,Sarpanch-SemiBold.ttf,279216,OK
+SourceSansPro,(manifest),,,local-json,SourceSansPro.json,1496,OK
+SourceSansPro,Light,300,normal,local-bundled,SourceSansPro-Light.ttf,268588,OK
+SourceSansPro,Regular,400,normal,local-bundled,SourceSansPro-Regular.ttf,269108,OK
+SourceSansPro,Italic,400,italic,local-bundled,SourceSansPro-It.ttf,94816,OK
+SourceSansPro,Semi Bold,600,normal,local-bundled,SourceSansPro-Semibold.ttf,268280,OK
+SourceSansPro,Bold,700,normal,local-bundled,SourceSansPro-Bold.ttf,267388,OK
+SourceSansPro,Extra Light Italic,200,italic,assetid-8075253699,SourceSansPro-ExtraLightItalic.ttf,109700,OK
+SourceSansPro,Light Italic,300,italic,assetid-8075254683,SourceSansPro-LightItalic.ttf,110324,OK
+SourceSansPro,Semi Bold Italic,600,italic,assetid-8075255754,SourceSansPro-SemiBoldItalic.ttf,109412,OK
+SourceSansPro,Extra Light,200,normal,assetid-8075252781,SourceSansPro-ExtraLight.ttf,247584,OK
+SourceSansPro,Bold Italic,700,italic,assetid-8075251923,SourceSansPro-BoldItalic.ttf,109296,OK
+SourceSansPro,Black,900,normal,assetid-8043677567,SourceSansPro-Black.ttf,247980,OK
+SourceSansPro,Black Italic,900,italic,assetid-8075250899,SourceSansPro-BlackItalic.ttf,108568,OK
+SpecialElite,(manifest),,,local-json,SpecialElite.json,173,OK
+SpecialElite,Regular,400,normal,local-bundled,SpecialElite-Regular.ttf,151080,OK
+TitilliumWeb,(manifest),,,local-json,TitilliumWeb.json,1325,OK
+TitilliumWeb,Regular,400,normal,local-bundled,TitilliumWeb-Regular.ttf,57392,OK
+TitilliumWeb,Bold,700,normal,local-bundled,TitilliumWeb-Bold.ttf,53896,OK
+TitilliumWeb,Light Italic,300,italic,assetid-8075261706,TitilliumWeb-LightItalic.ttf,64560,OK
+TitilliumWeb,Italic,400,italic,assetid-8074027763,TitilliumWeb-Italic.ttf,65284,OK
+TitilliumWeb,Extra Light,200,normal,assetid-8075258117,TitilliumWeb-ExtraLight.ttf,56724,OK
+TitilliumWeb,Extra Light Italic,200,italic,assetid-8075259007,TitilliumWeb-ExtraLightItalic.ttf,60848,OK
+TitilliumWeb,Light,300,normal,assetid-8075259994,TitilliumWeb-Light.ttf,64004,OK
+TitilliumWeb,Semi Bold,600,normal,assetid-8075262738,TitilliumWeb-SemiBold.ttf,56752,OK
+TitilliumWeb,Semi Bold Italic,600,italic,assetid-8075263748,TitilliumWeb-SemiBoldItalic.ttf,64816,OK
+TitilliumWeb,Black,900,normal,assetid-8075257018,TitilliumWeb-Black.ttf,43664,OK
+TitilliumWeb,Bold Italic,700,italic,assetid-8074030881,TitilliumWeb-BoldItalic.ttf,62924,OK
+Ubuntu,(manifest),,,local-json,Ubuntu.json,956,OK
+Ubuntu,Regular,400,normal,local-bundled,Ubuntu-Regular.ttf,298928,OK
+Ubuntu,Italic,400,italic,local-bundled,Ubuntu-Italic.ttf,326292,OK
+Ubuntu,Medium,500,normal,assetid-8075269680,Ubuntu-Medium.ttf,284424,OK
+Ubuntu,Light Italic,300,italic,assetid-8075268457,Ubuntu-LightItalic.ttf,349540,OK
+Ubuntu,Light,300,normal,assetid-8075267523,Ubuntu-Light.ttf,361676,OK
+Ubuntu,Medium Italic,500,italic,assetid-8075270634,Ubuntu-MediumItalic.ttf,308748,OK
+Ubuntu,Bold,700,normal,assetid-8075264808,Ubuntu-Bold.ttf,269584,OK
+Ubuntu,Bold Italic,700,italic,assetid-8075265549,Ubuntu-BoldItalic.ttf,282700,OK
+Zekton,(manifest),,,local-json,Zekton.json,155,OK
+Zekton,Regular,400,normal,local-bundled,zekton_rg.ttf,86964,OK
