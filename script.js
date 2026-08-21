@@ -382,26 +382,98 @@ function buildSegmentHtml(seg) {
   return html;
 }
 
-// ===== 将 stroke 标签转换为 CSS 描边（用于预览） =====
-function convertStrokeForPreview(html) {
-  return html.replace(/<stroke\s+color="([^"]*)"\s+thickness="([^"]*)"\s+transparency="([^"]*)"\s*>(.*?)<\/stroke>/gi, (match, color, thick, transp, inner) => {
-    const alpha = 1 - parseFloat(transp);
-    const rgb = hexToRgb(color);
-    const rgba = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
-    return `<span style="-webkit-text-stroke: ${thick}px ${rgba}; -webkit-text-stroke-color: ${rgba}; display:inline-block;">${inner}</span>`;
-  });
+// ===== HTML 文本转义（仅用于预览层） =====
+function escapeHtmlText(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// ===== 将 font 标签的官方 family 路径转换为 CSS 字体（仅用于预览） =====
-// 仅做渲染层转换：生成的 Rich Text 代码中 family 仍保持
-// rbxasset://fonts/families/<Family>.json 官方格式不变。
-function convertFontForPreview(html) {
-  return html
-    .replace(
-      /<font color="([^"]*)"\s+family="rbxasset:\/\/fonts\/families\/([^"]+)\.json">/g,
-      (match, color, family) => `<span style="color:${color}; font-family:'${family}';">`
-    )
-    .replace(/<\/font>/g, '</span>');
+// ===== 生成分段预览用的 HTML（CSS 模拟 Roblox Rich Text 渲染） =====
+// 仅用于网页预览；生成的 Rich Text 代码仍由 buildSegmentHtml 负责，
+// <font> 标签内的 family 属性保持官方 rbxasset://fonts/families/<Family>.json 格式不变。
+// 说明：
+// 1. 下划线/删除线不再依赖 <u>/<s> 标签，而是直接画在每个字符 span 上，
+//    装饰线颜色 = 该字符颜色（与渐变文本逐字同步）。
+// 2. 开启描边时，<u>/<s> 的装饰线会被 -webkit-text-stroke 盖住，且装饰无法
+//    传播进 display:inline-block 的描边层，因此采用双层结构：
+//    底层 = 描边层（2× 厚度，外层一半可见），上层 = 绝对定位的填充 + 装饰线层。
+function buildSegmentPreviewHtml(seg) {
+  const text = seg.text;
+  if (!text) return '';
+
+  const fontFamily = seg.font || '';
+  const textSolid = seg.textMode === 'solid';
+  const strokeOn = seg.strokeEnabled;
+  const strokeSolid = seg.strokeMode === 'solid';
+  const tColors = getCharacterColors(text, seg.textStart, seg.textMid, seg.textEnd, seg.textMode);
+  const sColors = getCharacterColors(text, seg.strokeStart, seg.strokeMid, seg.strokeEnd, seg.strokeMode);
+  const thick = seg.strokeThick;
+  const trans = seg.strokeTrans;
+
+  const decos = [];
+  if (seg.underline) decos.push('underline');
+  if (seg.strike) decos.push('line-through');
+  const decoStr = decos.join(' ');
+  const needDeco = decos.length > 0;
+
+  const fontStyle = (color) => `color:${color}; font-family:'${fontFamily}';`;
+  const strokeRgba = (sc) => {
+    const rgb = hexToRgb(sc);
+    const alpha = 1 - trans;
+    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+  };
+
+  let inner = '';
+
+  if (textSolid && (!strokeOn || strokeSolid) && !needDeco) {
+    // 纯色文本 + 单色描边/无描边：整段一个 span（保留字距与连字）
+    let style = fontStyle(seg.textStart);
+    if (strokeOn) {
+      style += ` -webkit-text-stroke:${thick}px ${strokeRgba(seg.strokeStart)}; display:inline-block;`;
+    }
+    inner = `<span style="${style}">${escapeHtmlText(text)}</span>`;
+  } else if (needDeco && !strokeOn && textSolid) {
+    // 纯色文本 + 装饰线（无描边）：整段一个 span，装饰线颜色跟随文字色
+    inner = `<span style="${fontStyle(seg.textStart)} text-decoration:${decoStr};">${escapeHtmlText(text)}</span>`;
+  } else if (!needDeco) {
+    // 渐变文本 / 渐变描边：逐字 span
+    for (let i = 0; i < text.length; i++) {
+      const tc = tColors[i] || seg.textStart;
+      let style = fontStyle(tc);
+      if (strokeOn) {
+        const sc = sColors[i] || seg.strokeStart;
+        style += ` -webkit-text-stroke:${thick}px ${strokeRgba(sc)}; display:inline-block;`;
+      }
+      inner += `<span style="${style}">${escapeHtmlText(text[i])}</span>`;
+    }
+  } else if (needDeco && strokeOn) {
+    // 描边 + 装饰线：双层结构，装饰线画在上层（描边之上），颜色逐字同步
+    let strokeLayer = '';
+    let fillLayer = '';
+    for (let i = 0; i < text.length; i++) {
+      const tc = tColors[i] || seg.textStart;
+      const sc = sColors[i] || seg.strokeStart;
+      const ch = escapeHtmlText(text[i]);
+      // 底层：描边层，厚度 ×2（内半被上层填充覆盖，外半 = 视觉厚度 thick）
+      strokeLayer += `<span style="${fontStyle(tc)} -webkit-text-stroke:${thick * 2}px ${strokeRgba(sc)};">${ch}</span>`;
+      // 上层：填充 + 装饰线，描边清零，装饰线颜色 = 字符颜色
+      fillLayer += `<span style="${fontStyle(tc)} -webkit-text-stroke:0; text-decoration:${decoStr};">${ch}</span>`;
+    }
+    inner = `<span style="position:relative; display:inline-block; text-align:center;">` +
+      `<span style="display:inline-block;">${strokeLayer}</span>` +
+      `<span style="position:absolute; top:0; left:0; width:100%;">${fillLayer}</span>` +
+      `</span>`;
+  } else {
+    // 渐变文本 + 装饰线（无描边）：逐字 span，装饰线颜色逐字同步
+    for (let i = 0; i < text.length; i++) {
+      const tc = tColors[i] || seg.textStart;
+      inner += `<span style="${fontStyle(tc)} text-decoration:${decoStr};">${escapeHtmlText(text[i])}</span>`;
+    }
+  }
+
+  if (seg.bold) inner = `<b>${inner}</b>`;
+  if (seg.italic) inner = `<i>${inner}</i>`;
+
+  return inner;
 }
 
 // ===== 分段拆分（仅 || 触发分段，单个 | 不拆分） =====
@@ -579,7 +651,7 @@ function selectSegment(i) {
 // ===== 输出渲染 =====
 function renderOutput() {
   const full = segments.map(buildSegmentHtml).join('');
-  const previewHtml = convertStrokeForPreview(convertFontForPreview(full));
+  const previewHtml = segments.map(buildSegmentPreviewHtml).join('');
   previewRender.innerHTML = previewHtml || '&nbsp;';
   codeContent.textContent = full;
 }
