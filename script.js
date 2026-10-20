@@ -102,8 +102,6 @@ const I18N = {
     randomTitle: '随机配色',
     codeTitle: 'Rich Text 代码',
     codeLenTitle: '代码字符数',
-    presetTitle: '预设示例',
-    presetBadge: '点击加载',
     footerText: 'Made with ♥ 献给 Nullscape 社区 · bl1nkCur',
     toastCopied: '已复制到剪贴板',
     toastCopyFail: '复制失败，请手动选择代码复制',
@@ -159,8 +157,6 @@ const I18N = {
     randomTitle: 'Random colors',
     codeTitle: 'Rich Text Code',
     codeLenTitle: 'Code length',
-    presetTitle: 'Presets',
-    presetBadge: 'Click to load',
     footerText: 'Made with ♥ for the Nullscape community · bl1nkCur',
     toastCopied: 'Copied to clipboard',
     toastCopyFail: 'Copy failed, please select the code manually',
@@ -172,57 +168,6 @@ const I18N = {
     codeEmpty: 'Empty — code appears once you enter a title',
     strokeOnSummary: 'On',
     strokeOffSummary: 'Off'
-  }
-};
-
-const PRESETS = {
-  endurance: {
-    name: 'ENDURANCE',
-    text: 'ENDURANCE',
-    textMode: 'gradient', textStart: '#87292B', textMid: '#B03A40', textEnd: '#F54B4E',
-    strokeEnabled: false, strokeMode: 'solid', strokeStart: '#87292B', strokeMid: '#B03A40', strokeEnd: '#F54B4E',
-    strokeThick: 2, strokeTrans: 0,
-    bold: false, italic: false, underline: false, strike: false, font: 'BuilderSans'
-  },
-  celestial: {
-    name: 'CELESTIAL',
-    text: 'CELESTIAL',
-    textMode: 'gradient', textStart: '#9E3862', textMid: '#C9467C', textEnd: '#F25597',
-    strokeEnabled: false, strokeMode: 'solid', strokeStart: '#9E3862', strokeMid: '#C9467C', strokeEnd: '#F25597',
-    strokeThick: 2, strokeTrans: 0,
-    bold: false, italic: false, underline: false, strike: false, font: 'BuilderSans'
-  },
-  gliders: {
-    name: '20 GLIDERS',
-    text: '20 Gliders VS CELESTIAL',
-    textMode: 'solid', textStart: '#96CBFF', textMid: '#96CBFF', textEnd: '#96CBFF',
-    strokeEnabled: true, strokeMode: 'solid', strokeStart: '#692B64', strokeMid: '#692B64', strokeEnd: '#692B64',
-    strokeThick: 2, strokeTrans: 0,
-    bold: true, italic: false, underline: false, strike: false, font: 'BuilderSans'
-  },
-  vbs: {
-    name: 'VOIDBOUND SCARF',
-    text: 'VOIDBOUND SCARF',
-    textMode: 'gradient', textStart: '#8481A6', textMid: '#A7A3C7', textEnd: '#CBC6FF',
-    strokeEnabled: false, strokeMode: 'solid', strokeStart: '#8481A6', strokeMid: '#A7A3C7', strokeEnd: '#CBC6FF',
-    strokeThick: 2, strokeTrans: 0,
-    bold: true, italic: false, underline: false, strike: false, font: 'BuilderSans'
-  },
-  void: {
-    name: 'VOID WALKERS',
-    text: 'VOID WALKERS',
-    textMode: 'edge', textStart: '#7C3AED', textMid: '#A78BFA', textEnd: '#E9D5FF',
-    strokeEnabled: false, strokeMode: 'solid', strokeStart: '#7C3AED', strokeMid: '#A78BFA', strokeEnd: '#E9D5FF',
-    strokeThick: 2, strokeTrans: 0,
-    bold: true, italic: false, underline: false, strike: false, font: 'FredokaOne'
-  },
-  rainbow: {
-    name: 'RAINBOW',
-    text: 'RAINBOW',
-    textMode: 'rainbow', textStart: '#FF0000', textMid: '#00FF00', textEnd: '#0000FF',
-    strokeEnabled: false, strokeMode: 'solid', strokeStart: '#87292B', strokeMid: '#B03A40', strokeEnd: '#F54B4E',
-    strokeThick: 2, strokeTrans: 0,
-    bold: false, italic: false, underline: false, strike: false, font: 'LuckiestGuy'
   }
 };
 
@@ -311,7 +256,7 @@ const el = {};
  'codeBlock', 'codeContent', 'codeLen', 'codeCopyBtn', 'copyBtn', 'resetBtn', 'undoBtn', 'redoBtn', 'randomBtn',
  'toastRoot', 'langSwitch', 'langThumb', 'panelColor', 'panelStroke', 'panelFont',
  'colorSummary', 'strokeSummary', 'fontSummary', 'strokeSwitchLabel',
- 'stageScroll', 'controlsScroll', 'presetGrid'
+ 'stageScroll', 'controlsScroll'
 ].forEach(id => { el[id] = document.getElementById(id); });
 
 /* ================= 状态 ================= */
@@ -635,7 +580,7 @@ function toast(msg, type) {
 /* ================= 涟漪反馈 ================= */
 
 function spawnRipple(e) {
-  const host = e.target.closest('.btn, .icon-btn, .mini-btn, .preset-btn, .segment-chip, .swatch-btn, .chip');
+  const host = e.target.closest('.btn, .icon-btn, .mini-btn, .segment-chip, .swatch-btn, .chip');
   if (!host || host.disabled) return;
   const rect = host.getBoundingClientRect();
   const size = Math.max(rect.width, rect.height) * 1.1;
@@ -816,10 +761,52 @@ function refreshPanelStates() {
     const panel = el['panel' + key[0].toUpperCase() + key.slice(1)];
     if (panel) {
       panel.classList.toggle('closed', !!closed);
+      /* 同步高度（无动画，用于初始化/恢复状态） */
+      const body = $('.panel-body', panel);
+      if (body) body.style.height = closed ? '0px' : 'auto';
       const toggle = $('.panel-toggle', panel);
       if (toggle) toggle.setAttribute('aria-expanded', closed ? 'false' : 'true');
     }
   });
+}
+
+/* 面板折叠：Web Animations API 高度动画，兼容所有现代浏览器 */
+function setPanelOpen(panel, open) {
+  const body = $('.panel-body', panel);
+  if (!body) return;
+
+  panel.classList.toggle('closed', !open);
+  const full = body.scrollHeight;
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!body.animate || reduced) {
+    body.style.height = open ? 'auto' : '0px';
+    if (open) updateModeThumb($('.mode-seg', panel));
+    return;
+  }
+
+  const start = body.getBoundingClientRect().height;
+  const end = open ? full : 0;
+  /* 连续点击时取消上一次动画，避免冲突 */
+  if (body._panelAnim) {
+    body._panelAnim.onfinish = null;
+    body._panelAnim.oncancel = null;
+    body._panelAnim.cancel();
+  }
+  const anim = body.animate(
+    [{ height: start + 'px' }, { height: end + 'px' }],
+    { duration: 320, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+  );
+  body._panelAnim = anim;
+  anim.onfinish = () => {
+    body.style.height = open ? 'auto' : '0px';
+    body._panelAnim = null;
+    if (open) updateModeThumb($('.mode-seg', panel));
+  };
+  anim.oncancel = () => {
+    body.style.height = open ? 'auto' : '0px';
+    body._panelAnim = null;
+  };
 }
 
 function updateSummaries() {
@@ -889,12 +876,23 @@ function renderOutput(shouldPulse) {
 }
 
 let firstRenderDone = false;
+let lastCharLen = -1;
 
 function updateCharCount() {
   const len = state.text.length;
   el.charCount.textContent = `${len}/${MAX_TEXT_LEN}`;
   el.charCount.classList.toggle('near-limit', len >= 45);
   el.inputClear.hidden = len === 0;
+
+  /* 数字变化时弹跳反馈 */
+  if (len !== lastCharLen) {
+    lastCharLen = len;
+    if (firstRenderDone) {
+      el.charCount.classList.remove('pop');
+      void el.charCount.offsetWidth;
+      el.charCount.classList.add('pop');
+    }
+  }
 }
 
 function renderSegmentChips() {
@@ -969,45 +967,6 @@ function applyTextChange() {
   el.textInput.value = state.text;
   flushContinuous();
   renderAll(true);
-}
-
-/* ================= 预设 ================= */
-
-function renderPresets() {
-  el.presetGrid.innerHTML = '';
-  Object.entries(PRESETS).forEach(([key, p]) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'preset-btn';
-    btn.dataset.preset = key;
-    btn.title = p.text;
-
-    const preview = document.createElement('span');
-    preview.className = 'preset-preview';
-    preview.innerHTML = buildSegmentPreviewHtml(makeSegment(p.text, p)) || '&nbsp;';
-    btn.appendChild(preview);
-
-    const name = document.createElement('span');
-    name.className = 'preset-name';
-    name.textContent = p.name;
-    btn.appendChild(name);
-
-    btn.addEventListener('click', () => applyPreset(key));
-    el.presetGrid.appendChild(btn);
-  });
-}
-
-function applyPreset(key) {
-  const p = PRESETS[key];
-  if (!p) return;
-  pushHistory();
-  state.text = p.text;
-  state.segments = [makeSegment(p.text, p)];
-  state.active = 0;
-  el.textInput.value = p.text;
-  syncControls();
-  renderAll(true);
-  fitPreview();
 }
 
 /* ================= 字体选择器 ================= */
@@ -1536,14 +1495,9 @@ $$('.panel-toggle').forEach(toggle => {
     const panel = toggle.closest('.panel');
     const key = panel.id.replace('panel', '').toLowerCase();
     const closed = !panel.classList.contains('closed');
-    panel.classList.toggle('closed', closed);
     state.collapsed[key] = closed;
     toggle.setAttribute('aria-expanded', closed ? 'false' : 'true');
-    if (!closed) {
-      setTimeout(() => {
-        updateModeThumb($('.mode-seg', panel));
-      }, 360);
-    }
+    setPanelOpen(panel, !closed);
     savePersist();
   });
 });
@@ -1599,15 +1553,6 @@ el.controlsScroll.addEventListener('scroll', () => {
 }, { passive: true });
 
 /* 面板展开后重算滑块（transitionend 兜底） */
-document.addEventListener('transitionend', e => {
-  if (e.target.classList && e.target.classList.contains('panel-body')) {
-    const panel = e.target.closest('.panel');
-    if (panel && !panel.classList.contains('closed')) {
-      updateModeThumb($('.mode-seg', panel));
-    }
-  }
-});
-
 /* ================= 初始化 ================= */
 
 (function init() {
@@ -1616,7 +1561,6 @@ document.addEventListener('transitionend', e => {
   document.body.appendChild(el.fontDropdown);
 
   renderSwatches();
-  renderPresets();
 
   const persisted = loadPersist();
   if (persisted) {
