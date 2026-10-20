@@ -53,9 +53,10 @@
         <!-- ===== 工作区 ===== -->
         <main class="workspace">
 
-            <!-- 左侧：控制面板 -->
+            <!-- 左侧：控制面板（吸顶 + 内部滚动） -->
             <aside class="controls" aria-label="Settings">
-                <div class="controls-scroll" id="controlsScroll">
+                <div class="controls-sticky">
+                    <div class="controls-scroll" id="controlsScroll">
 
                     <!-- 文本颜色 -->
                     <section class="panel" id="panelColor" style="--i:1">
@@ -320,6 +321,7 @@
                         </div>
                     </section>
 
+                </div>
                 </div>
             </aside>
 

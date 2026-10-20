@@ -240,6 +240,98 @@ function deepCopy(o) {
   return JSON.parse(JSON.stringify(o));
 }
 
+/* ================= JS 动效引擎（Web Animations API） =================
+   全部交互动效由 JS 驱动，不依赖 CSS animation/transition，
+   在任何浏览器与系统设置下都能流畅播放。 */
+
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (REDUCED_MOTION) document.body.classList.add('reduced');
+
+const FX = {
+  EASE_OUT: 'cubic-bezier(0.22, 1, 0.36, 1)',
+  EASE_SPRING: 'cubic-bezier(0.34, 1.45, 0.64, 1)',
+  EASE_INOUT: 'cubic-bezier(0.65, 0, 0.35, 1)',
+
+  play(el, keyframes, opts = {}) {
+    if (!el || typeof el.animate !== 'function') return null;
+    const { duration = 300, easing = FX.EASE_OUT, fill = 'none', delay = 0, onfinish = null } = opts;
+    try {
+      const anim = el.animate(keyframes, { duration, easing, fill, delay });
+      if (onfinish) anim.onfinish = onfinish;
+      return anim;
+    } catch (err) {
+      return null;
+    }
+  },
+
+  /* 入场：淡入上浮 */
+  enter(el, { delay = 0, y = 16, duration = 460 } = {}) {
+    return FX.play(el, [
+      { opacity: 0, transform: `translateY(${y}px)` },
+      { opacity: 1, transform: 'translateY(0px)' }
+    ], { duration, easing: FX.EASE_OUT, fill: 'backwards', delay });
+  },
+
+  /* 按压回弹 */
+  press(el, scale = 0.93, duration = 170) {
+    return FX.play(el, [
+      { transform: 'scale(1)' },
+      { transform: `scale(${scale})` },
+      { transform: 'scale(1)' }
+    ], { duration, easing: FX.EASE_OUT });
+  },
+
+  /* 悬浮抬升 */
+  lift(el, ty = -2, scale = 1.02, duration = 150) {
+    if (el._liftAnim) { el._liftAnim.onfinish = null; el._liftAnim.cancel(); el._liftAnim = null; }
+    el._liftAnim = FX.play(el, [
+      { transform: 'translateY(0px) scale(1)' },
+      { transform: `translateY(${ty}px) scale(${scale})` }
+    ], { duration, easing: FX.EASE_OUT, fill: 'forwards' });
+  },
+
+  /* 悬浮复位 */
+  unlift(el) {
+    if (el._liftAnim) { el._liftAnim.onfinish = null; el._liftAnim.cancel(); el._liftAnim = null; }
+    const cur = getComputedStyle(el).transform || 'none';
+    FX.play(el, [
+      { transform: cur === 'none' ? 'translateY(0px) scale(1)' : cur },
+      { transform: 'translateY(0px) scale(1)' }
+    ], { duration: 140, easing: FX.EASE_OUT });
+  },
+
+  /* 弹跳 */
+  bounce(el, scale = 1.22, duration = 300) {
+    return FX.play(el, [
+      { transform: 'scale(1)' },
+      { transform: `scale(${scale})` },
+      { transform: 'scale(1)' }
+    ], { duration, easing: FX.EASE_SPRING });
+  },
+
+  /* 抖动 */
+  shake(el, duration = 320) {
+    return FX.play(el, [
+      { transform: 'translateX(0px)' },
+      { transform: 'translateX(-4px)' },
+      { transform: 'translateX(4px)' },
+      { transform: 'translateX(-2px)' },
+      { transform: 'translateX(2px)' },
+      { transform: 'translateX(0px)' }
+    ], { duration, easing: FX.EASE_INOUT });
+  },
+
+  fadeIn(el, duration = 180) {
+    return FX.play(el, [{ opacity: 0 }, { opacity: 1 }], { duration, easing: FX.EASE_OUT });
+  },
+
+  fadeOut(el, duration = 150, onfinish = null) {
+    return FX.play(el, [{ opacity: 1 }, { opacity: 0 }], {
+      duration, easing: FX.EASE_INOUT, fill: 'forwards', onfinish
+    });
+  }
+};
+
 /* ================= DOM 引用 ================= */
 
 const el = {};
@@ -571,14 +663,23 @@ function toast(msg, type) {
   t.className = 'toast' + (type === 'error' ? ' error' : '');
   t.innerHTML = `<span class="toast-dot"></span><span>${escapeHtmlText(msg)}</span>`;
   el.toastRoot.appendChild(t);
+  FX.play(t, [
+    { opacity: 0, transform: 'translateY(16px) scale(0.9)' },
+    { opacity: 1, transform: 'translateY(0px) scale(1)' }
+  ], { duration: 320, easing: FX.EASE_SPRING });
   setTimeout(() => {
-    t.classList.add('leave');
-    t.addEventListener('animationend', () => t.remove(), { once: true });
+    const a = FX.play(t, [
+      { opacity: 1, transform: 'translateY(0px) scale(1)' },
+      { opacity: 0, transform: 'translateY(8px) scale(0.94)' }
+    ], { duration: 220, easing: FX.EASE_INOUT });
+    if (a) a.onfinish = () => t.remove();
+    else t.remove();
   }, 1900);
 }
 
-/* ================= 涟漪反馈 ================= */
+/* ================= 全局交互动效（JS 驱动） ================= */
 
+/* 涟漪（WAAPI） */
 function spawnRipple(e) {
   const host = e.target.closest('.btn, .icon-btn, .mini-btn, .segment-chip, .swatch-btn, .chip');
   if (!host || host.disabled) return;
@@ -590,10 +691,66 @@ function spawnRipple(e) {
   span.style.left = (e.clientX - rect.left - size / 2) + 'px';
   span.style.top = (e.clientY - rect.top - size / 2) + 'px';
   host.appendChild(span);
-  span.addEventListener('animationend', () => span.remove(), { once: true });
+  const anim = span.animate(
+    [
+      { transform: 'scale(0)', opacity: 0.5 },
+      { transform: 'scale(2.6)', opacity: 0 }
+    ],
+    { duration: 520, easing: FX.EASE_OUT }
+  );
+  if (anim) anim.onfinish = () => span.remove();
+  else setTimeout(() => span.remove(), 560);
 }
 
+/* 按压回弹（全局委托） */
+const PRESS_SELECTOR = '.btn, .icon-btn, .mini-btn, .chip, .swatch-btn, .segment-chip, .lang-opt, .font-picker-btn';
+document.addEventListener('pointerdown', e => {
+  const el = e.target.closest(PRESS_SELECTOR);
+  if (el && !el.disabled) FX.press(el);
+}, { passive: true });
+
 document.addEventListener('pointerdown', spawnRipple, { passive: true });
+
+/* 悬浮抬升（全局委托，仅鼠标） */
+const LIFT_SELECTOR = '.btn, .icon-btn, .mini-btn, .chip, .swatch-btn, .segment-chip, .font-picker-btn, .color-field, .lang-opt, .swatch, .mode-btn';
+
+document.addEventListener('pointerover', e => {
+  if (e.pointerType !== 'mouse') return;
+  const el = e.target.closest(LIFT_SELECTOR);
+  if (!el || el.disabled) return;
+  if (e.relatedTarget && e.relatedTarget.closest(LIFT_SELECTOR) === el) return;
+  applyLift(el);
+}, { passive: true });
+
+document.addEventListener('pointerout', e => {
+  if (e.pointerType !== 'mouse') return;
+  const el = e.target.closest(LIFT_SELECTOR);
+  if (!el) return;
+  if (e.relatedTarget && e.relatedTarget.closest(LIFT_SELECTOR) === el) return;
+  clearLift(el);
+}, { passive: true });
+
+function applyLift(el) {
+  if (el.matches('.mode-btn')) {
+    const icon = $('.mode-icon', el);
+    if (icon) FX.lift(icon, -2, 1.12, 160);
+  } else if (el.matches('.swatch-btn')) {
+    FX.lift(el, 0, 1.3, 160);
+  } else if (el.matches('.swatch')) {
+    FX.lift(el, 0, 1.1, 160);
+  } else {
+    FX.lift(el, -2, 1.02, 150);
+  }
+}
+
+function clearLift(el) {
+  if (el.matches('.mode-btn')) {
+    const icon = $('.mode-icon', el);
+    if (icon) FX.unlift(icon);
+  } else {
+    FX.unlift(el);
+  }
+}
 
 /* ================= 控件 <-> 状态同步 ================= */
 
@@ -693,9 +850,22 @@ function updateModeThumb(group) {
   const thumb = group.querySelector('.mode-thumb');
   if (!active || !thumb) return;
   const w = active.offsetWidth;
-  if (w > 0) {
+  if (w <= 0) return;
+  const x = active.offsetLeft - 4;
+  const groupRect = group.getBoundingClientRect();
+  const cur = thumb.getBoundingClientRect();
+  const curX = cur.left - groupRect.left;
+  const curW = cur.width;
+
+  if (Math.abs(curX - x) + Math.abs(curW - w) > 1) {
+    /* 滑动胶囊：JS 弹簧动画 */
+    FX.play(thumb, [
+      { transform: `translateX(${curX}px)`, width: `${curW}px` },
+      { transform: `translateX(${x}px)`, width: `${w}px` }
+    ], { duration: 320, easing: FX.EASE_SPRING, fill: 'forwards' });
+  } else {
+    thumb.style.transform = `translateX(${x}px)`;
     thumb.style.width = w + 'px';
-    thumb.style.transform = `translateX(${active.offsetLeft - 4}px)`;
   }
 }
 
@@ -725,9 +895,10 @@ function setFieldVisible(field, visible) {
   const show = visible && !field.hidden;
   field.hidden = !visible;
   if (show) {
-    field.classList.remove('enter');
-    void field.offsetWidth; // 重启动画
-    field.classList.add('enter');
+    FX.play(field, [
+      { opacity: 0, transform: 'translateY(-6px) scale(0.97)' },
+      { opacity: 1, transform: 'translateY(0px) scale(1)' }
+    ], { duration: 280, easing: FX.EASE_OUT });
   }
 }
 
@@ -750,10 +921,27 @@ function updateGradientPreview(prefix) {
   bar.classList.toggle('animated', mode === 'rainbow');
 }
 
-function refreshStrokeState() {
+/* 开关旋钮动画 */
+function setKnob(on, animate) {
+  const knob = $('.switch-knob', el.strokeSwitchLabel);
+  if (!knob) return;
+  const to = on ? 'translateX(17px)' : 'translateX(0px)';
+  if (knob._knobAnim) { knob._knobAnim.onfinish = null; knob._knobAnim.cancel(); knob._knobAnim = null; }
+  if (animate) {
+    knob._knobAnim = FX.play(knob, [
+      { transform: on ? 'translateX(0px)' : 'translateX(17px)' },
+      { transform: to }
+    ], { duration: 260, easing: FX.EASE_SPRING, fill: 'forwards' });
+  } else {
+    knob.style.transform = to;
+  }
+}
+
+function refreshStrokeState(animateKnob) {
   const on = el.optStroke.checked;
   el.panelStroke.classList.toggle('stroke-off', !on);
   el.strokeSwitchLabel.title = on ? I18N[state.lang].strokeOnSummary : I18N[state.lang].strokeOffSummary;
+  setKnob(on, !!animateKnob);
 }
 
 function refreshPanelStates() {
@@ -867,9 +1055,11 @@ function renderOutput(shouldPulse) {
   el.codeLen.textContent = String(full.length);
 
   if (changed && shouldPulse && firstRenderDone) {
-    el.previewInner.classList.remove('pulse');
-    void el.previewInner.offsetWidth;
-    el.previewInner.classList.add('pulse');
+    FX.play(el.previewInner, [
+      { filter: 'brightness(1)' },
+      { filter: 'brightness(1.45)' },
+      { filter: 'brightness(1)' }
+    ], { duration: 360, easing: FX.EASE_OUT });
   }
   lastPreviewHtml = previewHtml;
   fitPreview();
@@ -877,21 +1067,20 @@ function renderOutput(shouldPulse) {
 
 let firstRenderDone = false;
 let lastCharLen = -1;
+let prevChipCount = -1;
 
 function updateCharCount() {
   const len = state.text.length;
   el.charCount.textContent = `${len}/${MAX_TEXT_LEN}`;
   el.charCount.classList.toggle('near-limit', len >= 45);
+  const wasHidden = el.inputClear.hidden;
   el.inputClear.hidden = len === 0;
+  if (wasHidden && !el.inputClear.hidden) FX.fadeIn(el.inputClear, 160);
 
   /* 数字变化时弹跳反馈 */
   if (len !== lastCharLen) {
     lastCharLen = len;
-    if (firstRenderDone) {
-      el.charCount.classList.remove('pop');
-      void el.charCount.offsetWidth;
-      el.charCount.classList.add('pop');
-    }
+    if (firstRenderDone) FX.bounce(el.charCount, 1.3, 320);
   }
 }
 
@@ -929,7 +1118,10 @@ function renderSegmentChips() {
       del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
       del.addEventListener('click', e => {
         e.stopPropagation();
-        removeSegment(i);
+        /* 先播放删除动画，再移除分段 */
+        const go = () => removeSegment(i);
+        const a = FX.fadeOut(btn, 140, go);
+        if (!a) go();
       });
       btn.appendChild(del);
     }
@@ -937,6 +1129,17 @@ function renderSegmentChips() {
     btn.addEventListener('click', () => selectSegment(i));
     el.segmentChips.appendChild(btn);
   });
+
+  /* 分段数量变化时芯片依次弹入（避免每次按键重复播放） */
+  if (state.segments.length !== prevChipCount) {
+    prevChipCount = state.segments.length;
+    $$('.segment-chip', el.segmentChips).forEach((chip, i) => {
+      FX.play(chip, [
+        { opacity: 0, transform: 'translateY(8px) scale(0.9)' },
+        { opacity: 1, transform: 'translateY(0px) scale(1)' }
+      ], { duration: 300, easing: FX.EASE_SPRING, fill: 'backwards', delay: Math.min(i * 40, 240) });
+    });
+  }
 }
 
 function selectSegment(i) {
@@ -946,6 +1149,8 @@ function selectSegment(i) {
   syncControls();
   renderOutput(false);
   renderSegmentChips();
+  const chip = $$('.segment-chip', el.segmentChips)[i];
+  if (chip) FX.bounce(chip, 1.06, 260);
   savePersist();
 }
 
@@ -984,7 +1189,18 @@ function setCurrentFont(family) {
 function updateFontListUI() {
   const current = el.fontCurrentName.dataset.family;
   $$('.font-item', el.fontList).forEach(item => {
-    item.classList.toggle('selected', item.dataset.family === current);
+    const on = item.dataset.family === current;
+    const was = item.classList.contains('selected');
+    item.classList.toggle('selected', on);
+    if (on && !was) {
+      const check = $('.fi-check', item);
+      if (check) {
+        FX.play(check, [
+          { opacity: 0, transform: 'scale(0.4)' },
+          { opacity: 1, transform: 'scale(1)' }
+        ], { duration: 280, easing: FX.EASE_SPRING });
+      }
+    }
   });
 }
 
@@ -1084,14 +1300,27 @@ function openFontPicker() {
   el.fontSearch.value = '';
   renderFontList('');
   positionFontDropdown();
+  FX.play(el.fontDropdown, [
+    { opacity: 0, transform: 'translateY(-10px) scale(0.97)' },
+    { opacity: 1, transform: 'translateY(0px) scale(1)' }
+  ], { duration: 240, easing: FX.EASE_OUT });
   setTimeout(() => el.fontSearch.focus(), 30);
 }
 
-function closeFontPicker() {
-  el.fontDropdown.hidden = true;
-  el.fontPicker.classList.remove('open');
-  el.fontPickerBtn.setAttribute('aria-expanded', 'false');
-  el.fontSearch.blur();
+function closeFontPicker(animate = true) {
+  const done = () => {
+    el.fontDropdown.hidden = true;
+    el.fontPicker.classList.remove('open');
+    el.fontPickerBtn.setAttribute('aria-expanded', 'false');
+    el.fontSearch.blur();
+  };
+  if (!animate) { done(); return; }
+  const a = FX.play(el.fontDropdown, [
+    { opacity: 1, transform: 'translateY(0px) scale(1)' },
+    { opacity: 0, transform: 'translateY(-6px) scale(0.97)' }
+  ], { duration: 150, easing: FX.EASE_INOUT });
+  if (a) a.onfinish = done;
+  else done();
 }
 
 /* 下拉面板用 fixed 定位（面板 overflow:hidden 不会裁剪），跟随按钮位置 */
@@ -1258,6 +1487,7 @@ let copyFlashTimer = null;
 function flashCopySuccess(btn) {
   if (!btn) return;
   btn.classList.add('success');
+  FX.bounce(btn, 1.05, 380);
   if (btn === el.copyBtn) {
     const label = $('span', btn);
     if (label) label.textContent = I18N[state.lang].copiedBtn;
@@ -1287,12 +1517,13 @@ function resetAll() {
 
 /* ================= 预览自适应缩放 ================= */
 
+let lastScaleTarget = 'scale(1)';
+
 const fitPreview = debounce(() => {
   const stage = el.previewContainer;
   const render = el.previewRender;
   if (!stage || !render) return;
 
-  el.previewInner.style.transform = 'none';
   const avail = stage.clientWidth - 44;
   if (!avail) return;
 
@@ -1301,13 +1532,22 @@ const fitPreview = debounce(() => {
   const natural = render.scrollWidth;
   const s = Math.min(1, avail / natural);
 
+  let target = 'scale(1)';
   if (s < 0.42) {
     /* 过长：恢复换行，不缩放 */
     render.style.whiteSpace = '';
-    el.previewInner.style.transform = '';
-    return;
+  } else if (s < 1) {
+    target = `scale(${s})`;
   }
-  el.previewInner.style.transform = s < 1 ? `scale(${s})` : '';
+
+  if (target !== lastScaleTarget) {
+    const cur = getComputedStyle(el.previewInner).transform;
+    FX.play(el.previewInner, [
+      { transform: (cur && cur !== 'none') ? cur : 'scale(1)' },
+      { transform: target }
+    ], { duration: 300, easing: FX.EASE_OUT, fill: 'forwards' });
+    lastScaleTarget = target;
+  }
 }, 60);
 
 /* ================= i18n ================= */
@@ -1332,6 +1572,7 @@ function setLanguage(lang) {
   document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
   el.langSwitch.dataset.active = lang;
   $$('.lang-opt').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+  animateLangThumb();
 
   refreshColorUI('text');
   refreshColorUI('stroke');
@@ -1341,6 +1582,16 @@ function setLanguage(lang) {
   updateSummaries();
   updateCharCount();
   savePersist();
+}
+
+/* 语言滑块：JS 弹簧滑动 */
+function animateLangThumb() {
+  const on = state.lang === 'en';
+  const to = on ? 'translateX(100%)' : 'translateX(0px)';
+  FX.play(el.langThumb, [
+    { transform: on ? 'translateX(0px)' : 'translateX(100%)' },
+    { transform: to }
+  ], { duration: 300, easing: FX.EASE_SPRING, fill: 'forwards' });
 }
 
 function switchLanguage(lang) {
@@ -1379,6 +1630,7 @@ function bindColorPair(pickerId, hexId) {
       hex.classList.remove('invalid');
       commitColorChange();
     } else {
+      if (!hex.classList.contains('invalid')) FX.shake(hex, 300);
       hex.classList.add('invalid');
     }
   });
@@ -1435,7 +1687,7 @@ setupModeGroup(el.strokeModeGroup, 'stroke');
 el.optStroke.addEventListener('change', () => {
   pushHistory();
   readControlsToActive();
-  refreshStrokeState();
+  refreshStrokeState(true);
   renderOutput(true);
   updateSummaries();
   savePersist();
@@ -1447,6 +1699,7 @@ function bindSlider(input, valEl) {
     beginContinuous();
     valEl.textContent = formatNum(parseFloat(input.value));
     updateSliderFill(input);
+    FX.bounce(valEl, 1.25, 240);
     readControlsToActive();
     flushContinuous();
     renderOutput(true);
@@ -1547,12 +1800,16 @@ window.addEventListener('resize', () => {
   if (!el.fontDropdown.hidden) positionFontDropdown();
 });
 
-/* 控制列滚动时收起字体下拉（避免错位） */
-el.controlsScroll.addEventListener('scroll', () => {
-  if (!el.fontDropdown.hidden) closeFontPicker();
+/* 页面/控制列滚动：预览阴影强化 + 收起字体下拉（避免错位） */
+window.addEventListener('scroll', () => {
+  el.previewCard.classList.toggle('scrolled', window.scrollY > 8);
+  if (!el.fontDropdown.hidden) closeFontPicker(false);
 }, { passive: true });
 
-/* 面板展开后重算滑块（transitionend 兜底） */
+el.controlsScroll.addEventListener('scroll', () => {
+  if (!el.fontDropdown.hidden) closeFontPicker(false);
+}, { passive: true });
+
 /* ================= 初始化 ================= */
 
 (function init() {
@@ -1587,6 +1844,15 @@ el.controlsScroll.addEventListener('scroll', () => {
   renderAll(false);
   firstRenderDone = true;
 
+  /* 入场动画：顶栏与各面板依次浮现（JS 驱动） */
+  if (!REDUCED_MOTION) {
+    const header = document.querySelector('.app-header');
+    if (header) FX.enter(header, { y: -14, duration: 420 });
+    $$('.panel, .preview-card, .action-row').forEach((elm, i) => {
+      FX.enter(elm, { delay: 80 + i * 55, y: 16, duration: 460 });
+    });
+  }
+
   /* 字体就绪后淡入预览并重新适配 */
   let ready = false;
   const markReady = () => {
@@ -1599,9 +1865,4 @@ el.controlsScroll.addEventListener('scroll', () => {
     document.fonts.ready.then(markReady);
   }
   setTimeout(markReady, 900);
-
-  /* 吸顶预览阴影强化（滚动时） */
-  el.stageScroll.addEventListener('scroll', () => {
-    el.previewCard.classList.toggle('scrolled', el.stageScroll.scrollTop > 4);
-  }, { passive: true });
 })();
