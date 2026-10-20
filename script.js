@@ -1,18 +1,28 @@
-// ===== 字体列表 =====
+/* =====================================================================
+ * Nullscape Lobby Title Generator — 核心脚本（重构版）
+ * ---------------------------------------------------------------------
+ * 纯原生 JS，零依赖。生成的 Roblox Rich Text 格式与原版完全一致。
+ * 新增：撤销/重做、快捷键、搜索式字体选择器、快速取色、随机配色、
+ *       自动保存、预览自适应缩放、Toast 通知、涟漪反馈。
+ * ===================================================================== */
+'use strict';
+
+/* ================= 常量与数据 ================= */
+
 const FONT_LIST = [
   { label: 'Accanthis ADF Std', family: 'AccanthisADFStd' },
   { label: 'Amatic SC', family: 'AmaticSC' },
   { label: 'Arimo', family: 'Arimo' },
   { label: 'Balthazar', family: 'Balthazar' },
-  { label: 'Bangers', family: 'Bangers' },
+  { label: 'Bangers', family: 'Bangers', popular: true },
   { label: 'Builder Extended', family: 'BuilderExtended' },
   { label: 'Builder Mono', family: 'BuilderMono' },
-  { label: 'Builder Sans', family: 'BuilderSans' },
+  { label: 'Builder Sans', family: 'BuilderSans', popular: true },
   { label: 'Comic Neue Angular', family: 'ComicNeueAngular' },
-  { label: 'Creepster', family: 'Creepster' },
-  { label: 'Denk One', family: 'DenkOne' },
+  { label: 'Creepster', family: 'Creepster', popular: true },
+  { label: 'Denk One', family: 'DenkOne', popular: true },
   { label: 'Fondamento', family: 'Fondamento' },
-  { label: 'Fredoka One', family: 'FredokaOne' },
+  { label: 'Fredoka One', family: 'FredokaOne', popular: true },
   { label: 'Grenze Gotisch', family: 'GrenzeGotisch' },
   { label: 'Guru', family: 'Guru' },
   { label: 'Highway Gothic', family: 'HighwayGothic' },
@@ -21,16 +31,16 @@ const FONT_LIST = [
   { label: 'Josefin Sans', family: 'JosefinSans' },
   { label: 'Jura', family: 'Jura' },
   { label: 'Kalam', family: 'Kalam' },
-  { label: 'Luckiest Guy', family: 'LuckiestGuy' },
+  { label: 'Luckiest Guy', family: 'LuckiestGuy', popular: true },
   { label: 'Merriweather', family: 'Merriweather' },
   { label: 'Michroma', family: 'Michroma' },
-  { label: 'Montserrat', family: 'Montserrat' },
+  { label: 'Montserrat', family: 'Montserrat', popular: true },
   { label: 'Nunito', family: 'Nunito' },
   { label: 'Oswald', family: 'Oswald' },
   { label: 'Patrick Hand', family: 'PatrickHand' },
-  { label: 'Permanent Marker', family: 'PermanentMarker' },
-  { label: 'Press Start 2P', family: 'PressStart2P' },
-  { label: 'Roboto', family: 'Roboto' },
+  { label: 'Permanent Marker', family: 'PermanentMarker', popular: true },
+  { label: 'Press Start 2P', family: 'PressStart2P', popular: true },
+  { label: 'Roboto', family: 'Roboto', popular: true },
   { label: 'Roboto Condensed', family: 'RobotoCondensed' },
   { label: 'Roboto Mono', family: 'RobotoMono' },
   { label: 'Roman Antique', family: 'RomanAntique' },
@@ -42,15 +52,17 @@ const FONT_LIST = [
   { label: 'Zekton', family: 'Zekton' }
 ];
 
-// ===== 多语言字典 =====
+const PALETTE = [
+  '#B388FF', '#E879F9', '#F25597', '#F54B4E', '#FF8A65',
+  '#FFD166', '#96CBFF', '#6EE7B7', '#FFFFFF', '#D4D0EA',
+  '#8481A6', '#17102B'
+];
+
 const I18N = {
   zh: {
-    brandTitle: 'Nullscape Lobby Title Generator',
     brandSub: '为 Nullscaper 生成更好的大厅标题',
-    textLabel: '文本内容',
-    textPlaceholder: '输入标题，用 || 分隔分段...',
-    textHint: '使用 || 分隔多个分段，每个分段可单独设置样式（单个 | 不会分段）',
-    segmentLabel: '分段',
+    githubLinkTitle: '在 GitHub 上查看源码',
+    langTitle: '切换语言 / Switch language',
     textColorLabel: '文本颜色',
     startColorLabel: '起始色',
     midColorLabel: '中间色',
@@ -59,113 +71,113 @@ const I18N = {
     centerColorLabel: '中间色',
     solid: '纯色',
     gradient: '渐变',
-    three: '三色渐变',
-    rainbow: '🌈 彩虹',
-    edge: '两边→中间',
-    strokeSettings: '描边设置',
-    enable: '启用',
+    three: '三色',
+    rainbow: '彩虹',
+    edge: '两边→中',
+    rainbowNote: '彩虹模式：颜色按色相自动生成',
+    quickColors: '快速取色',
+    strokeSettings: '描边',
     thickness: '厚度',
     opacity: '透明度',
-    fontLabel: '字体',
-    textStyleLabel: '文本样式',
+    fontLabel: '字体与样式',
+    fontSearchPlaceholder: '搜索字体…',
+    popularFonts: '常用字体',
+    allFonts: '全部字体',
     bold: '粗体',
     italic: '斜体',
     underline: '下划线',
     strikethrough: '删除线',
+    textLabel: '标题文本',
+    textPlaceholder: '输入标题，用 || 分隔分段…',
+    textHint: '使用 || 分隔多个分段，每个分段可单独设置样式',
+    clearText: '清空文本',
+    segmentLabel: '分段',
+    deleteSegment: '删除该分段',
     previewTitle: '预览',
-    codeTitle: '生成的 Rich Text 代码',
-    copyBtn: '📋 复制',
-    resetBtn: '↺ 重置',
+    copyBtn: '复制代码',
+    copiedBtn: '已复制！',
+    resetBtn: '重置',
+    undoTitle: '撤销 (Ctrl+Z)',
+    redoTitle: '重做 (Ctrl+Shift+Z)',
+    randomTitle: '随机配色',
+    codeTitle: 'Rich Text 代码',
+    codeLenTitle: '代码字符数',
     presetTitle: '预设示例',
     presetBadge: '点击加载',
-    langLabel: '中文'
+    footerText: 'Made with ♥ 献给 Nullscape 社区 · bl1nkCur',
+    toastCopied: '已复制到剪贴板',
+    toastCopyFail: '复制失败，请手动选择代码复制',
+    toastReset: '已重置为默认样式',
+    toastRandom: '已随机生成新配色',
+    toastUndo: '已撤销',
+    toastRedo: '已重做',
+    toastEmpty: '文本为空，请输入内容',
+    codeEmpty: '暂无内容 —— 输入标题后自动生成',
+    strokeOnSummary: '开',
+    strokeOffSummary: '关'
   },
   en: {
-    brandTitle: 'Nullscape Lobby Title Generator',
     brandSub: 'Generate better lobby titles for Nullscaper',
-    textLabel: 'Text',
-    textPlaceholder: 'Enter title, use || to split segments...',
-    textHint: 'Use || to split segments; each segment can be styled independently (single | is not a separator)',
-    segmentLabel: 'Segment',
+    githubLinkTitle: 'View source on GitHub',
+    langTitle: '切换语言 / Switch language',
     textColorLabel: 'Text Color',
-    startColorLabel: 'Start Color',
-    midColorLabel: 'Mid Color',
-    endColorLabel: 'End Color',
-    edgeStartColorLabel: 'Edge Color',
-    centerColorLabel: 'Center Color',
+    startColorLabel: 'Start',
+    midColorLabel: 'Middle',
+    endColorLabel: 'End',
+    edgeStartColorLabel: 'Edges',
+    centerColorLabel: 'Center',
     solid: 'Solid',
     gradient: 'Gradient',
     three: '3-Color',
-    rainbow: '🌈 Rainbow',
+    rainbow: 'Rainbow',
     edge: 'Edges→Mid',
-    strokeSettings: 'Stroke Settings',
-    enable: 'Enable',
+    rainbowNote: 'Rainbow mode: colors are generated by hue',
+    quickColors: 'Quick Pick',
+    strokeSettings: 'Stroke',
     thickness: 'Thickness',
     opacity: 'Opacity',
-    fontLabel: 'Font',
-    textStyleLabel: 'Text Style',
+    fontLabel: 'Font & Style',
+    fontSearchPlaceholder: 'Search fonts…',
+    popularFonts: 'Popular',
+    allFonts: 'All Fonts',
     bold: 'Bold',
     italic: 'Italic',
     underline: 'Underline',
-    strikethrough: 'Strikethrough',
+    strikethrough: 'Strike',
+    textLabel: 'Title Text',
+    textPlaceholder: 'Enter title, use || to split segments…',
+    textHint: 'Use || to split segments; each segment can be styled independently',
+    clearText: 'Clear text',
+    segmentLabel: 'Segment',
+    deleteSegment: 'Delete this segment',
     previewTitle: 'Preview',
-    codeTitle: 'Generated Rich Text Code',
-    copyBtn: '📋 Copy',
-    resetBtn: '↺ Reset',
+    copyBtn: 'Copy Code',
+    copiedBtn: 'Copied!',
+    resetBtn: 'Reset',
+    undoTitle: 'Undo (Ctrl+Z)',
+    redoTitle: 'Redo (Ctrl+Shift+Z)',
+    randomTitle: 'Random colors',
+    codeTitle: 'Rich Text Code',
+    codeLenTitle: 'Code length',
     presetTitle: 'Presets',
     presetBadge: 'Click to load',
-    langLabel: 'English'
+    footerText: 'Made with ♥ for the Nullscape community · bl1nkCur',
+    toastCopied: 'Copied to clipboard',
+    toastCopyFail: 'Copy failed, please select the code manually',
+    toastReset: 'Reset to default style',
+    toastRandom: 'New random colors applied',
+    toastUndo: 'Undone',
+    toastRedo: 'Redone',
+    toastEmpty: 'Text is empty, please enter something',
+    codeEmpty: 'Empty — code appears once you enter a title',
+    strokeOnSummary: 'On',
+    strokeOffSummary: 'Off'
   }
 };
 
-let currentLang = 'zh';
-
-// ===== DOM 引用 =====
-const textInput = document.getElementById('textInput');
-const charCount = document.getElementById('charCount');
-const segmentTabs = document.getElementById('segmentTabs');
-
-const textModeGroup = document.getElementById('textModeGroup');
-const textStartColor = document.getElementById('textStartColor');
-const textMidColor = document.getElementById('textMidColor');
-const textEndColor = document.getElementById('textEndColor');
-const textStartColorHex = document.getElementById('textStartColorHex');
-const textMidColorHex = document.getElementById('textMidColorHex');
-const textEndColorHex = document.getElementById('textEndColorHex');
-const textGradientPreview = document.getElementById('textGradientPreview');
-
-const strokeModeGroup = document.getElementById('strokeModeGroup');
-const strokeStartColor = document.getElementById('strokeStartColor');
-const strokeMidColor = document.getElementById('strokeMidColor');
-const strokeEndColor = document.getElementById('strokeEndColor');
-const strokeStartColorHex = document.getElementById('strokeStartColorHex');
-const strokeMidColorHex = document.getElementById('strokeMidColorHex');
-const strokeEndColorHex = document.getElementById('strokeEndColorHex');
-const strokeGradientPreview = document.getElementById('strokeGradientPreview');
-const optStroke = document.getElementById('optStroke');
-const strokeColorArea = document.getElementById('strokeColorArea');
-const strokeThickness = document.getElementById('strokeThickness');
-const strokeTransparency = document.getElementById('strokeTransparency');
-const strokeThicknessVal = document.getElementById('strokeThicknessVal');
-const strokeTransparencyVal = document.getElementById('strokeTransparencyVal');
-
-const fontSelect = document.getElementById('fontSelect');
-const optBold = document.getElementById('optBold');
-const optItalic = document.getElementById('optItalic');
-const optUnderline = document.getElementById('optUnderline');
-const optStrikethrough = document.getElementById('optStrikethrough');
-
-const previewRender = document.getElementById('previewRender');
-const codeContent = document.getElementById('codeContent');
-const copyBtn = document.getElementById('copyBtn');
-const resetBtn = document.getElementById('resetBtn');
-
-const langToggle = document.getElementById('langToggle');
-const langLabel = document.getElementById('langLabel');
-
-// ===== 预设数据 =====
 const PRESETS = {
   endurance: {
+    name: 'ENDURANCE',
     text: 'ENDURANCE',
     textMode: 'gradient', textStart: '#87292B', textMid: '#B03A40', textEnd: '#F54B4E',
     strokeEnabled: false, strokeMode: 'solid', strokeStart: '#87292B', strokeMid: '#B03A40', strokeEnd: '#F54B4E',
@@ -173,6 +185,7 @@ const PRESETS = {
     bold: false, italic: false, underline: false, strike: false, font: 'BuilderSans'
   },
   celestial: {
+    name: 'CELESTIAL',
     text: 'CELESTIAL',
     textMode: 'gradient', textStart: '#9E3862', textMid: '#C9467C', textEnd: '#F25597',
     strokeEnabled: false, strokeMode: 'solid', strokeStart: '#9E3862', strokeMid: '#C9467C', strokeEnd: '#F25597',
@@ -180,6 +193,7 @@ const PRESETS = {
     bold: false, italic: false, underline: false, strike: false, font: 'BuilderSans'
   },
   gliders: {
+    name: '20 GLIDERS',
     text: '20 Gliders VS CELESTIAL',
     textMode: 'solid', textStart: '#96CBFF', textMid: '#96CBFF', textEnd: '#96CBFF',
     strokeEnabled: true, strokeMode: 'solid', strokeStart: '#692B64', strokeMid: '#692B64', strokeEnd: '#692B64',
@@ -187,18 +201,123 @@ const PRESETS = {
     bold: true, italic: false, underline: false, strike: false, font: 'BuilderSans'
   },
   vbs: {
+    name: 'VOIDBOUND SCARF',
     text: 'VOIDBOUND SCARF',
     textMode: 'gradient', textStart: '#8481A6', textMid: '#A7A3C7', textEnd: '#CBC6FF',
     strokeEnabled: false, strokeMode: 'solid', strokeStart: '#8481A6', strokeMid: '#A7A3C7', strokeEnd: '#CBC6FF',
     strokeThick: 2, strokeTrans: 0,
     bold: true, italic: false, underline: false, strike: false, font: 'BuilderSans'
+  },
+  void: {
+    name: 'VOID WALKERS',
+    text: 'VOID WALKERS',
+    textMode: 'edge', textStart: '#7C3AED', textMid: '#A78BFA', textEnd: '#E9D5FF',
+    strokeEnabled: false, strokeMode: 'solid', strokeStart: '#7C3AED', strokeMid: '#A78BFA', strokeEnd: '#E9D5FF',
+    strokeThick: 2, strokeTrans: 0,
+    bold: true, italic: false, underline: false, strike: false, font: 'FredokaOne'
+  },
+  rainbow: {
+    name: 'RAINBOW',
+    text: 'RAINBOW',
+    textMode: 'rainbow', textStart: '#FF0000', textMid: '#00FF00', textEnd: '#0000FF',
+    strokeEnabled: false, strokeMode: 'solid', strokeStart: '#87292B', strokeMid: '#B03A40', strokeEnd: '#F54B4E',
+    strokeThick: 2, strokeTrans: 0,
+    bold: false, italic: false, underline: false, strike: false, font: 'LuckiestGuy'
   }
 };
 
-// ===== 默认分段样式 =====
-function defaultSegment() {
+const MAX_TEXT_LEN = 50;
+const STORAGE_KEY = 'nsltg:v2';
+const RAINBOW_CSS = 'linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff)';
+
+/* ================= 工具函数 ================= */
+
+const $ = (sel, root) => (root || document).querySelector(sel);
+const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+
+function clamp(v, min, max) {
+  return Math.min(max, Math.max(min, v));
+}
+
+function debounce(fn, ms) {
+  let t;
+  return function (...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), ms);
+  };
+}
+
+function escapeHtmlText(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function hexToRgb(hex) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '');
+  return m ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) }
+           : { r: 0, g: 0, b: 0 };
+}
+
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(n => clamp(Math.round(n), 0, 255).toString(16).padStart(2, '0')).join('');
+}
+
+function lerpColor(c1, c2, t) {
+  return rgbToHex(
+    c1.r + (c2.r - c1.r) * t,
+    c1.g + (c2.g - c1.g) * t,
+    c1.b + (c2.b - c1.b) * t
+  );
+}
+
+function hslToHex(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+  if (h < 60) { r = c; g = x; }
+  else if (h < 120) { r = x; g = c; }
+  else if (h < 180) { g = c; b = x; }
+  else if (h < 240) { g = x; b = c; }
+  else if (h < 300) { r = x; b = c; }
+  else { r = c; b = x; }
+  return rgbToHex((r + m) * 255, (g + m) * 255, (b + m) * 255);
+}
+
+/** amt: -1~1，负数变暗、正数变亮 */
+function shade(hex, amt) {
+  const { r, g, b } = hexToRgb(hex);
+  const f = t => amt < 0 ? t * (1 + amt) : t + (255 - t) * amt;
+  return rgbToHex(f(r), f(g), f(b));
+}
+
+function deepCopy(o) {
+  return JSON.parse(JSON.stringify(o));
+}
+
+/* ================= DOM 引用 ================= */
+
+const el = {};
+['textInput', 'charCount', 'segmentChips', 'inputClear',
+ 'textModeGroup', 'textStartColor', 'textMidColor', 'textEndColor',
+ 'textStartColorHex', 'textMidColorHex', 'textEndColorHex', 'textGradientPreview', 'textRainbowNote',
+ 'textStartColorGroup', 'textMidColorGroup', 'textEndColorGroup',
+ 'strokeModeGroup', 'strokeStartColor', 'strokeMidColor', 'strokeEndColor',
+ 'strokeStartColorHex', 'strokeMidColorHex', 'strokeEndColorHex', 'strokeGradientPreview', 'strokeRainbowNote',
+ 'strokeStartColorGroup', 'strokeMidColorGroup', 'strokeEndColorGroup',
+ 'optStroke', 'strokeThickness', 'strokeTransparency', 'strokeThicknessVal', 'strokeTransparencyVal',
+ 'fontPicker', 'fontPickerBtn', 'fontDropdown', 'fontSearch', 'fontList', 'fontCurrentSample', 'fontCurrentName',
+ 'previewInner', 'previewRender', 'previewContainer', 'previewCard',
+ 'codeBlock', 'codeContent', 'codeLen', 'codeCopyBtn', 'copyBtn', 'resetBtn', 'undoBtn', 'redoBtn', 'randomBtn',
+ 'toastRoot', 'langSwitch', 'langThumb', 'panelColor', 'panelStroke', 'panelFont',
+ 'colorSummary', 'strokeSummary', 'fontSummary', 'strokeSwitchLabel',
+ 'stageScroll', 'controlsScroll', 'presetGrid'
+].forEach(id => { el[id] = document.getElementById(id); });
+
+/* ================= 状态 ================= */
+
+function defaultStyle() {
   return {
-    text: '',
     textMode: 'gradient', textStart: '#87292B', textMid: '#B03A40', textEnd: '#F54B4E',
     strokeEnabled: false, strokeMode: 'solid', strokeStart: '#87292B', strokeMid: '#B03A40', strokeEnd: '#F54B4E',
     strokeThick: 2, strokeTrans: 0,
@@ -206,87 +325,33 @@ function defaultSegment() {
   };
 }
 
-// ===== 状态 =====
-let segments = [];
-let activeSegment = 0;
-
-// ===== 模式按钮组辅助 =====
-function getModeFromGroup(group) {
-  const active = group.querySelector('.mode-btn.active');
-  return active ? active.dataset.mode : 'gradient';
+function makeSegment(text, base) {
+  return Object.assign(defaultStyle(), base || {}, { text: text || '' });
 }
 
-function setModeOnGroup(group, mode) {
-  group.querySelectorAll('.mode-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.mode === mode);
-  });
-}
+const state = {
+  lang: 'zh',
+  text: 'ENDURANCE',
+  segments: [makeSegment('ENDURANCE')],
+  active: 0,
+  collapsed: {}
+};
 
-// ===== 初始化字体下拉 =====
-FONT_LIST.forEach(f => {
-  const opt = document.createElement('option');
-  opt.value = f.family;
-  opt.textContent = f.label;
-  // 下拉选项内直接用真实字体预览（仅影响网页 UI，不改变生成的 Rich Text）
-  opt.style.fontFamily = `'${f.family}', 'Segoe UI', sans-serif`;
-  fontSelect.appendChild(opt);
-});
-fontSelect.value = 'BuilderSans';
+let undoStack = [];
+let redoStack = [];
+let lastPreviewHtml = null;
+let highlightIndex = -1;
+let visibleFontItems = [];
 
-// 让下拉框本身及选中项跟随当前字体显示
-function applyFontSelectPreview() {
-  const family = fontSelect.value;
-  fontSelect.style.fontFamily = `'${family}', 'Segoe UI', sans-serif`;
-  preloadFontFamily(family);
-}
+/* ================= 颜色算法 ================= */
 
-// ===== 颜色辅助函数 =====
-function hexToRgb(hex) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : { r: 0, g: 0, b: 0 };
-}
-
-function rgbToHex(r, g, b) {
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-}
-
-function lerpColor(c1, c2, t) {
-  const r = Math.round(c1.r + (c2.r - c1.r) * t);
-  const g = Math.round(c1.g + (c2.g - c1.g) * t);
-  const b = Math.round(c1.b + (c2.b - c1.b) * t);
-  return rgbToHex(r, g, b);
-}
-
-function hslToHex(h, s, l) {
-  const c = (1 - Math.abs(2 * l - 1)) * s;
-  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
-  const m = l - c / 2;
-  let r, g, b;
-  if (h < 60) { r = c; g = x; b = 0; }
-  else if (h < 120) { r = x; g = c; b = 0; }
-  else if (h < 180) { r = 0; g = c; b = x; }
-  else if (h < 240) { r = 0; g = x; b = c; }
-  else if (h < 300) { r = x; g = 0; b = c; }
-  else { r = c; g = 0; b = x; }
-  return rgbToHex(Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255));
-}
-
-// ===== 计算每个字符的颜色 =====
-// mode: solid / gradient / three / rainbow / edge
 function getCharacterColors(text, start, mid, end, mode) {
   const len = text.length;
-  if (len === 0) return [];
+  if (!len) return [];
 
   if (mode === 'rainbow') {
     const colors = [];
-    for (let i = 0; i < len; i++) {
-      const hue = (i / len) * 300;
-      colors.push(hslToHex(hue, 1, 0.55));
-    }
+    for (let i = 0; i < len; i++) colors.push(hslToHex((i / len) * 300, 1, 0.55));
     return colors;
   }
 
@@ -303,26 +368,23 @@ function getCharacterColors(text, start, mid, end, mode) {
         color = lerpColor(startRgb, endRgb, t);
         break;
       case 'three':
-        color = t < 0.5
-          ? lerpColor(startRgb, midRgb, t * 2)
-          : lerpColor(midRgb, endRgb, (t - 0.5) * 2);
+        color = t < 0.5 ? lerpColor(startRgb, midRgb, t * 2) : lerpColor(midRgb, endRgb, (t - 0.5) * 2);
         break;
       case 'edge': {
-        const d = Math.abs(2 * t - 1); // 0 = 中间，1 = 两边
-        color = lerpColor(endRgb, startRgb, d); // 两边=起始色，中间=结束色
+        const d = Math.abs(2 * t - 1);
+        color = lerpColor(endRgb, startRgb, d);
         break;
       }
-      case 'solid':
       default:
         color = start;
-        break;
     }
     colors.push(color);
   }
   return colors;
 }
 
-// ===== 生成单个分段的 Rich Text =====
+/* ================= Rich Text 生成（格式与原版完全一致） ================= */
+
 function buildSegmentHtml(seg) {
   const text = seg.text;
   if (!text) return '';
@@ -339,14 +401,12 @@ function buildSegmentHtml(seg) {
   let html = '';
 
   if (textSolid && (!strokeOn || strokeSolid)) {
-    // 纯色文本（且描边关闭或纯色描边）：单个 font 标签包裹整段
     let inner = text;
     if (strokeOn) {
       inner = `<stroke color="${seg.strokeStart}" thickness="${thick}" transparency="${trans}">${inner}</stroke>`;
     }
     html = `<font color="${seg.textStart}"${fontAttr}>${inner}</font>`;
   } else if (textSolid && strokeOn && !strokeSolid) {
-    // 纯色文本 + 渐变描边：单个 font 包裹，内部逐字 stroke（保留描边渐变）
     let strokes = '';
     for (let i = 0; i < text.length; i++) {
       const sc = sColors[i] || seg.strokeStart;
@@ -354,19 +414,15 @@ function buildSegmentHtml(seg) {
     }
     html = `<font color="${seg.textStart}"${fontAttr}>${strokes}</font>`;
   } else if (!textSolid && (!strokeOn || strokeSolid)) {
-    // 渐变文本 + 纯色/无描边：逐字 font，可选单个 stroke 包裹
     let fonts = '';
     for (let i = 0; i < text.length; i++) {
       const tc = tColors[i] || seg.textStart;
       fonts += `<font color="${tc}"${fontAttr}>${text[i]}</font>`;
     }
-    if (strokeOn && strokeSolid) {
-      html = `<stroke color="${seg.strokeStart}" thickness="${thick}" transparency="${trans}">${fonts}</stroke>`;
-    } else {
-      html = fonts;
-    }
+    html = strokeOn && strokeSolid
+      ? `<stroke color="${seg.strokeStart}" thickness="${thick}" transparency="${trans}">${fonts}</stroke>`
+      : fonts;
   } else {
-    // 渐变文本 + 渐变描边：逐字 font 包裹逐字 stroke
     for (let i = 0; i < text.length; i++) {
       const tc = tColors[i] || seg.textStart;
       const sc = sColors[i] || seg.strokeStart;
@@ -382,20 +438,8 @@ function buildSegmentHtml(seg) {
   return html;
 }
 
-// ===== HTML 文本转义（仅用于预览层） =====
-function escapeHtmlText(s) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
+/* ================= 预览渲染（CSS 模拟 Roblox 渲染，逻辑与原版一致） ================= */
 
-// ===== 生成分段预览用的 HTML（CSS 模拟 Roblox Rich Text 渲染） =====
-// 仅用于网页预览；生成的 Rich Text 代码仍由 buildSegmentHtml 负责，
-// <font> 标签内的 family 属性保持官方 rbxasset://fonts/families/<Family>.json 格式不变。
-// 说明：
-// 1. 下划线/删除线不再依赖 <u>/<s> 标签，而是直接画在每个字符 span 上，
-//    装饰线颜色 = 该字符颜色（与渐变文本逐字同步）。
-// 2. 开启描边时，<u>/<s> 的装饰线会被 -webkit-text-stroke 盖住，且装饰无法
-//    传播进 display:inline-block 的描边层，因此采用双层结构：
-//    底层 = 描边层（2× 厚度，外层一半可见），上层 = 绝对定位的填充 + 装饰线层。
 function buildSegmentPreviewHtml(seg) {
   const text = seg.text;
   if (!text) return '';
@@ -415,58 +459,48 @@ function buildSegmentPreviewHtml(seg) {
   const decoStr = decos.join(' ');
   const needDeco = decos.length > 0;
 
-  const fontStyle = (color) => `color:${color}; font-family:'${fontFamily}';`;
-  const strokeRgba = (sc) => {
+  const fontStyle = color => `color:${color};font-family:'${fontFamily}';`;
+  const strokeRgba = sc => {
     const rgb = hexToRgb(sc);
-    const alpha = 1 - trans;
-    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+    return `rgba(${rgb.r},${rgb.g},${rgb.b},${1 - trans})`;
   };
 
   let inner = '';
 
   if (textSolid && (!strokeOn || strokeSolid) && !needDeco) {
-    // 纯色文本 + 单色描边/无描边：整段一个 span（保留字距与连字）
     let style = fontStyle(seg.textStart);
-    if (strokeOn) {
-      style += ` -webkit-text-stroke:${thick}px ${strokeRgba(seg.strokeStart)}; display:inline-block;`;
-    }
+    if (strokeOn) style += `-webkit-text-stroke:${thick}px ${strokeRgba(seg.strokeStart)};display:inline-block;`;
     inner = `<span style="${style}">${escapeHtmlText(text)}</span>`;
   } else if (needDeco && !strokeOn && textSolid) {
-    // 纯色文本 + 装饰线（无描边）：整段一个 span，装饰线颜色跟随文字色
-    inner = `<span style="${fontStyle(seg.textStart)} text-decoration:${decoStr};">${escapeHtmlText(text)}</span>`;
+    inner = `<span style="${fontStyle(seg.textStart)}text-decoration:${decoStr};">${escapeHtmlText(text)}</span>`;
   } else if (!needDeco) {
-    // 渐变文本 / 渐变描边：逐字 span
     for (let i = 0; i < text.length; i++) {
       const tc = tColors[i] || seg.textStart;
       let style = fontStyle(tc);
       if (strokeOn) {
         const sc = sColors[i] || seg.strokeStart;
-        style += ` -webkit-text-stroke:${thick}px ${strokeRgba(sc)}; display:inline-block;`;
+        style += `-webkit-text-stroke:${thick}px ${strokeRgba(sc)};display:inline-block;`;
       }
       inner += `<span style="${style}">${escapeHtmlText(text[i])}</span>`;
     }
   } else if (needDeco && strokeOn) {
-    // 描边 + 装饰线：双层结构，装饰线画在上层（描边之上），颜色逐字同步
     let strokeLayer = '';
     let fillLayer = '';
     for (let i = 0; i < text.length; i++) {
       const tc = tColors[i] || seg.textStart;
       const sc = sColors[i] || seg.strokeStart;
       const ch = escapeHtmlText(text[i]);
-      // 底层：描边层，厚度 ×2（内半被上层填充覆盖，外半 = 视觉厚度 thick）
-      strokeLayer += `<span style="${fontStyle(tc)} -webkit-text-stroke:${thick * 2}px ${strokeRgba(sc)};">${ch}</span>`;
-      // 上层：填充 + 装饰线，描边清零，装饰线颜色 = 字符颜色
-      fillLayer += `<span style="${fontStyle(tc)} -webkit-text-stroke:0; text-decoration:${decoStr};">${ch}</span>`;
+      strokeLayer += `<span style="${fontStyle(tc)}-webkit-text-stroke:${thick * 2}px ${strokeRgba(sc)};">${ch}</span>`;
+      fillLayer += `<span style="${fontStyle(tc)}-webkit-text-stroke:0;text-decoration:${decoStr};">${ch}</span>`;
     }
-    inner = `<span style="position:relative; display:inline-block; text-align:center;">` +
+    inner = `<span style="position:relative;display:inline-block;text-align:center;">` +
       `<span style="display:inline-block;">${strokeLayer}</span>` +
-      `<span style="position:absolute; top:0; left:0; width:100%;">${fillLayer}</span>` +
+      `<span style="position:absolute;top:0;left:0;width:100%;">${fillLayer}</span>` +
       `</span>`;
   } else {
-    // 渐变文本 + 装饰线（无描边）：逐字 span，装饰线颜色逐字同步
     for (let i = 0; i < text.length; i++) {
       const tc = tColors[i] || seg.textStart;
-      inner += `<span style="${fontStyle(tc)} text-decoration:${decoStr};">${escapeHtmlText(text[i])}</span>`;
+      inner += `<span style="${fontStyle(tc)}text-decoration:${decoStr};">${escapeHtmlText(text[i])}</span>`;
     }
   }
 
@@ -476,97 +510,263 @@ function buildSegmentPreviewHtml(seg) {
   return inner;
 }
 
-// ===== 分段拆分（仅 || 触发分段，单个 | 不拆分） =====
+/* ================= 分段拆分 ================= */
+
 function splitText(raw) {
   return raw.split('||');
 }
 
 function reconcileSegments(parts) {
-  const prev = segments;
-  segments = parts.map((text, i) => {
-    if (prev[i]) return Object.assign({}, prev[i], { text });
-    return Object.assign({}, defaultSegment(), { text });
+  const prev = state.segments;
+  const activeStyle = prev[state.active] || defaultStyle();
+  state.segments = parts.map((text, i) => {
+    const base = prev[i] || prev[i - 1] || activeStyle;
+    return makeSegment(text, base);
   });
 }
 
-// ===== 控件 <-> 分段状态同步 =====
-function readControlsToSegment(i) {
-  const s = segments[i];
+/* ================= 历史（撤销/重做） ================= */
+
+function snapshot() {
+  return {
+    text: state.text,
+    segments: deepCopy(state.segments),
+    active: state.active
+  };
+}
+
+function pushHistory() {
+  undoStack.push(snapshot());
+  if (undoStack.length > 120) undoStack.shift();
+  redoStack = [];
+  updateUndoButtons();
+}
+
+/* 连续变化（文本输入 / 拖动滑杆 / 拖拽取色）：合并为一步历史。
+   在第一次变化前捕获「变化前」快照，防抖落地。 */
+let pendingBefore = null;
+
+function beginContinuous() {
+  if (pendingBefore === null) pendingBefore = snapshot();
+}
+
+const flushContinuous = debounce(() => {
+  if (!pendingBefore) return;
+  const now = snapshot();
+  if (JSON.stringify(now) !== JSON.stringify(pendingBefore)) {
+    undoStack.push(pendingBefore);
+    if (undoStack.length > 120) undoStack.shift();
+    redoStack = [];
+    updateUndoButtons();
+  }
+  pendingBefore = null;
+}, 400);
+
+function undo() {
+  if (!undoStack.length) return;
+  redoStack.push(snapshot());
+  const snap = undoStack.pop();
+  restoreSnapshot(snap);
+  toast(I18N[state.lang].toastUndo);
+  updateUndoButtons();
+}
+
+function redo() {
+  if (!redoStack.length) return;
+  undoStack.push(snapshot());
+  const snap = redoStack.pop();
+  restoreSnapshot(snap);
+  toast(I18N[state.lang].toastRedo);
+  updateUndoButtons();
+}
+
+function updateUndoButtons() {
+  el.undoBtn.disabled = !undoStack.length;
+  el.redoBtn.disabled = !redoStack.length;
+}
+
+function restoreSnapshot(snap) {
+  state.text = snap.text;
+  state.segments = deepCopy(snap.segments);
+  state.active = clamp(snap.active, 0, state.segments.length - 1);
+  el.textInput.value = state.text;
+  syncControls();
+  renderAll(false);
+  savePersist();
+}
+
+/* ================= 持久化 ================= */
+
+const savePersist = debounce(() => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      v: 2, text: state.text, segments: state.segments, active: state.active,
+      lang: state.lang, collapsed: state.collapsed
+    }));
+  } catch (e) { /* 隐私模式等场景忽略 */ }
+}, 300);
+
+function loadPersist() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (data && data.v === 2 && Array.isArray(data.segments) && data.segments.length) {
+      data.segments = data.segments.map(s => makeSegment(s.text, s));
+      return data;
+    }
+  } catch (e) { /* 忽略损坏数据 */ }
+  return null;
+}
+
+/* ================= Toast 通知 ================= */
+
+function toast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast' + (type === 'error' ? ' error' : '');
+  t.innerHTML = `<span class="toast-dot"></span><span>${escapeHtmlText(msg)}</span>`;
+  el.toastRoot.appendChild(t);
+  setTimeout(() => {
+    t.classList.add('leave');
+    t.addEventListener('animationend', () => t.remove(), { once: true });
+  }, 1900);
+}
+
+/* ================= 涟漪反馈 ================= */
+
+function spawnRipple(e) {
+  const host = e.target.closest('.btn, .icon-btn, .mini-btn, .preset-btn, .segment-chip, .swatch-btn, .chip');
+  if (!host || host.disabled) return;
+  const rect = host.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height) * 1.1;
+  const span = document.createElement('span');
+  span.className = 'ripple';
+  span.style.width = span.style.height = size + 'px';
+  span.style.left = (e.clientX - rect.left - size / 2) + 'px';
+  span.style.top = (e.clientY - rect.top - size / 2) + 'px';
+  host.appendChild(span);
+  span.addEventListener('animationend', () => span.remove(), { once: true });
+}
+
+document.addEventListener('pointerdown', spawnRipple, { passive: true });
+
+/* ================= 控件 <-> 状态同步 ================= */
+
+function getModeFromGroup(group) {
+  const active = group.querySelector('.mode-btn.active');
+  return active ? active.dataset.mode : 'gradient';
+}
+
+function setModeOnGroup(group, mode) {
+  $$('.mode-btn', group).forEach(btn => {
+    const on = btn.dataset.mode === mode;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+  updateModeThumb(group);
+}
+
+function readControlsToActive() {
+  const s = state.segments[state.active];
   if (!s) return;
-  s.textMode = getModeFromGroup(textModeGroup);
-  s.textStart = textStartColor.value;
-  s.textMid = textMidColor.value;
-  s.textEnd = textEndColor.value;
-  s.strokeEnabled = optStroke.checked;
-  s.strokeMode = getModeFromGroup(strokeModeGroup);
-  s.strokeStart = strokeStartColor.value;
-  s.strokeMid = strokeMidColor.value;
-  s.strokeEnd = strokeEndColor.value;
-  s.strokeThick = parseFloat(strokeThickness.value) || 1;
-  s.strokeTrans = parseFloat(strokeTransparency.value) || 0;
-  s.bold = optBold.checked;
-  s.italic = optItalic.checked;
-  s.underline = optUnderline.checked;
-  s.strike = optStrikethrough.checked;
-  s.font = fontSelect.value;
+  s.textMode = getModeFromGroup(el.textModeGroup);
+  s.textStart = el.textStartColor.value;
+  s.textMid = el.textMidColor.value;
+  s.textEnd = el.textEndColor.value;
+  s.strokeEnabled = el.optStroke.checked;
+  s.strokeMode = getModeFromGroup(el.strokeModeGroup);
+  s.strokeStart = el.strokeStartColor.value;
+  s.strokeMid = el.strokeMidColor.value;
+  s.strokeEnd = el.strokeEndColor.value;
+  s.strokeThick = parseFloat(el.strokeThickness.value) || 1;
+  s.strokeTrans = parseFloat(el.strokeTransparency.value) || 0;
+  s.bold = chipOn('bold');
+  s.italic = chipOn('italic');
+  s.underline = chipOn('underline');
+  s.strike = chipOn('strike');
+  s.font = el.fontCurrentName.dataset.family || 'BuilderSans';
 }
 
-function setStrokeAreaEnabled(enabled) {
-  strokeColorArea.style.opacity = enabled ? '1' : '0.4';
-  strokeColorArea.style.pointerEvents = enabled ? 'auto' : 'none';
+function chipOn(style) {
+  const chip = document.querySelector(`.chip[data-style="${style}"]`);
+  return chip ? chip.getAttribute('aria-pressed') === 'true' : false;
 }
 
-function loadSegmentToControls(i) {
-  const s = segments[i] || defaultSegment();
+function syncControls() {
+  const s = state.segments[state.active] || makeSegment('');
 
-  setModeOnGroup(textModeGroup, s.textMode);
-  textStartColor.value = s.textStart;
-  textStartColorHex.value = s.textStart;
-  textMidColor.value = s.textMid;
-  textMidColorHex.value = s.textMid;
-  textEndColor.value = s.textEnd;
-  textEndColorHex.value = s.textEnd;
+  setModeOnGroup(el.textModeGroup, s.textMode);
+  setModeOnGroup(el.strokeModeGroup, s.strokeMode);
 
-  setModeOnGroup(strokeModeGroup, s.strokeMode);
-  strokeStartColor.value = s.strokeStart;
-  strokeStartColorHex.value = s.strokeStart;
-  strokeMidColor.value = s.strokeMid;
-  strokeMidColorHex.value = s.strokeMid;
-  strokeEndColor.value = s.strokeEnd;
-  strokeEndColorHex.value = s.strokeEnd;
+  setColorField('text', 'Start', s.textStart);
+  setColorField('text', 'Mid', s.textMid);
+  setColorField('text', 'End', s.textEnd);
+  setColorField('stroke', 'Start', s.strokeStart);
+  setColorField('stroke', 'Mid', s.strokeMid);
+  setColorField('stroke', 'End', s.strokeEnd);
 
-  optStroke.checked = s.strokeEnabled;
-  setStrokeAreaEnabled(s.strokeEnabled);
+  el.optStroke.checked = s.strokeEnabled;
+  el.strokeThickness.value = s.strokeThick;
+  el.strokeThicknessVal.textContent = formatNum(s.strokeThick);
+  el.strokeTransparency.value = s.strokeTrans;
+  el.strokeTransparencyVal.textContent = formatNum(s.strokeTrans);
+  updateSliderFill(el.strokeThickness);
+  updateSliderFill(el.strokeTransparency);
 
-  strokeThickness.value = s.strokeThick;
-  strokeThicknessVal.textContent = s.strokeThick;
-  strokeTransparency.value = s.strokeTrans;
-  strokeTransparencyVal.textContent = s.strokeTrans;
+  setCurrentFont(s.font || 'BuilderSans');
 
-  fontSelect.value = s.font || 'BuilderSans';
-  applyFontSelectPreview();
-  optBold.checked = s.bold;
-  optItalic.checked = s.italic;
-  optUnderline.checked = s.underline;
-  optStrikethrough.checked = s.strike;
+  $$('.chip').forEach(chip => {
+    const on = !!s[chip.dataset.style];
+    chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
 
-  refreshColorModeUI('text');
-  refreshColorModeUI('stroke');
+  refreshColorUI('text');
+  refreshColorUI('stroke');
+  refreshStrokeState();
+  refreshPanelStates();
+  renderSegmentChips();
+  updateSummaries();
 }
 
-// ===== 颜色模式 UI：显隐 + 标签 + 预览条 =====
-function refreshColorModeUI(prefix) {
-  const group = document.getElementById(prefix + 'ModeGroup');
+function formatNum(n) {
+  return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+}
+
+function setColorField(prefix, pos, value) {
+  const picker = el[prefix + pos + 'Color'];
+  const hex = el[prefix + pos + 'ColorHex'];
+  picker.value = value;
+  hex.value = value;
+  hex.classList.remove('invalid');
+  const cover = document.querySelector(`.swatch[data-for="${prefix + pos + 'Color'}"] .swatch-cover`);
+  if (cover) cover.style.background = value;
+}
+
+function updateModeThumb(group) {
+  if (!group) return;
+  const active = group.querySelector('.mode-btn.active');
+  const thumb = group.querySelector('.mode-thumb');
+  if (!active || !thumb) return;
+  const w = active.offsetWidth;
+  if (w > 0) {
+    thumb.style.width = w + 'px';
+    thumb.style.transform = `translateX(${active.offsetLeft - 4}px)`;
+  }
+}
+
+function refreshColorUI(prefix) {
+  const group = el[prefix + 'ModeGroup'];
   const mode = getModeFromGroup(group);
   const showStart = mode !== 'rainbow';
   const showMid = mode === 'three';
   const showEnd = mode === 'gradient' || mode === 'three' || mode === 'edge';
 
-  document.getElementById(prefix + 'StartColorGroup').style.display = showStart ? '' : 'none';
-  document.getElementById(prefix + 'MidColorGroup').style.display = showMid ? '' : 'none';
-  document.getElementById(prefix + 'EndColorGroup').style.display = showEnd ? '' : 'none';
+  setFieldVisible(el[prefix + 'StartColorGroup'], showStart);
+  setFieldVisible(el[prefix + 'MidColorGroup'], showMid);
+  setFieldVisible(el[prefix + 'EndColorGroup'], showEnd);
+  el[prefix + 'RainbowNote'].hidden = mode !== 'rainbow';
 
-  const dict = I18N[currentLang];
+  const dict = I18N[state.lang];
   document.getElementById(prefix + 'StartColorLabel').textContent =
     mode === 'edge' ? dict.edgeStartColorLabel : dict.startColorLabel;
   document.getElementById(prefix + 'MidColorLabel').textContent = dict.midColorLabel;
@@ -576,51 +776,141 @@ function refreshColorModeUI(prefix) {
   updateGradientPreview(prefix);
 }
 
+function setFieldVisible(field, visible) {
+  const show = visible && !field.hidden;
+  field.hidden = !visible;
+  if (show) {
+    field.classList.remove('enter');
+    void field.offsetWidth; // 重启动画
+    field.classList.add('enter');
+  }
+}
+
 function updateGradientPreview(prefix) {
-  const group = document.getElementById(prefix + 'ModeGroup');
-  const mode = getModeFromGroup(group);
-  const start = document.getElementById(prefix + 'StartColor').value;
-  const mid = document.getElementById(prefix + 'MidColor').value;
-  const end = document.getElementById(prefix + 'EndColor').value;
-  const el = document.getElementById(prefix + 'GradientPreview');
+  const mode = getModeFromGroup(el[prefix + 'ModeGroup']);
+  const start = el[prefix + 'StartColor'].value;
+  const mid = el[prefix + 'MidColor'].value;
+  const end = el[prefix + 'EndColor'].value;
+  const bar = el[prefix + 'GradientPreview'];
 
   let bg;
   switch (mode) {
-    case 'solid':
-      bg = start;
-      break;
-    case 'three':
-      bg = `linear-gradient(90deg, ${start}, ${mid}, ${end})`;
-      break;
-    case 'edge':
-      bg = `linear-gradient(90deg, ${start}, ${end}, ${start})`;
-      break;
-    case 'rainbow':
-      bg = 'linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff)';
-      break;
-    case 'gradient':
-    default:
-      bg = `linear-gradient(90deg, ${start}, ${end})`;
-      break;
+    case 'solid': bg = start; break;
+    case 'three': bg = `linear-gradient(90deg, ${start}, ${mid}, ${end})`; break;
+    case 'edge': bg = `linear-gradient(90deg, ${start}, ${end}, ${start})`; break;
+    case 'rainbow': bg = RAINBOW_CSS; break;
+    default: bg = `linear-gradient(90deg, ${start}, ${end})`;
   }
-  el.style.background = bg;
+  bar.style.background = bg;
+  bar.classList.toggle('animated', mode === 'rainbow');
 }
 
-// ===== 分段标签渲染 =====
-function renderSegmentTabs() {
-  segmentTabs.innerHTML = '';
-  const dict = I18N[currentLang];
-  segments.forEach((seg, i) => {
+function refreshStrokeState() {
+  const on = el.optStroke.checked;
+  el.panelStroke.classList.toggle('stroke-off', !on);
+  el.strokeSwitchLabel.title = on ? I18N[state.lang].strokeOnSummary : I18N[state.lang].strokeOffSummary;
+}
+
+function refreshPanelStates() {
+  Object.entries(state.collapsed).forEach(([key, closed]) => {
+    const panel = el['panel' + key[0].toUpperCase() + key.slice(1)];
+    if (panel) {
+      panel.classList.toggle('closed', !!closed);
+      const toggle = $('.panel-toggle', panel);
+      if (toggle) toggle.setAttribute('aria-expanded', closed ? 'false' : 'true');
+    }
+  });
+}
+
+function updateSummaries() {
+  const dict = I18N[state.lang];
+  const s = state.segments[state.active] || makeSegment('');
+
+  el.colorSummary.innerHTML =
+    `<span class="summary-dot" style="background:${modeDotBg(s.textMode, s.textStart)}"></span>` +
+    escapeHtmlText(dict[s.textMode] || s.textMode);
+
+  el.strokeSummary.textContent = s.strokeEnabled ? dict.strokeOnSummary : dict.strokeOffSummary;
+
+  const f = FONT_LIST.find(x => x.family === s.font);
+  el.fontSummary.textContent = f ? f.label : s.font;
+}
+
+function modeDotBg(mode, start) {
+  return mode === 'rainbow' ? RAINBOW_CSS : start;
+}
+
+function updateSliderFill(input) {
+  const min = parseFloat(input.min);
+  const max = parseFloat(input.max);
+  const p = ((parseFloat(input.value) - min) / (max - min)) * 100;
+  input.style.background =
+    `linear-gradient(90deg, #a78bfa ${p}%, rgba(255,255,255,0.12) ${p}%)`;
+}
+
+/* ================= 渲染输出 ================= */
+
+let renderSeq = 0;
+
+function renderAll(shouldPulse) {
+  const parts = splitText(state.text);
+  reconcileSegments(parts);
+  if (state.active >= state.segments.length) {
+    state.active = state.segments.length - 1;
+    syncControls();
+  }
+
+  renderSegmentChips();
+  renderOutput(shouldPulse);
+  updateCharCount();
+  updateSummaries();
+  updateUndoButtons();
+  savePersist();
+}
+
+function renderOutput(shouldPulse) {
+  const full = state.segments.map(buildSegmentHtml).join('');
+  const previewHtml = state.segments.map(buildSegmentPreviewHtml).join('');
+  const changed = previewHtml !== lastPreviewHtml;
+
+  el.previewRender.innerHTML = previewHtml || '&nbsp;';
+  el.codeContent.textContent = full;
+  el.codeBlock.classList.toggle('empty', !full);
+  el.codeBlock.dataset.empty = I18N[state.lang].codeEmpty;
+  el.codeLen.textContent = String(full.length);
+
+  if (changed && shouldPulse && firstRenderDone) {
+    el.previewInner.classList.remove('pulse');
+    void el.previewInner.offsetWidth;
+    el.previewInner.classList.add('pulse');
+  }
+  lastPreviewHtml = previewHtml;
+  fitPreview();
+}
+
+let firstRenderDone = false;
+
+function updateCharCount() {
+  const len = state.text.length;
+  el.charCount.textContent = `${len}/${MAX_TEXT_LEN}`;
+  el.charCount.classList.toggle('near-limit', len >= 45);
+  el.inputClear.hidden = len === 0;
+}
+
+function renderSegmentChips() {
+  const dict = I18N[state.lang];
+  el.segmentChips.innerHTML = '';
+
+  state.segments.forEach((seg, i) => {
     const btn = document.createElement('button');
-    btn.className = 'segment-tab' + (i === activeSegment ? ' active' : '');
-    btn.dataset.index = i;
     btn.type = 'button';
+    btn.className = 'segment-chip' + (i === state.active ? ' active' : '');
+    btn.style.setProperty('--i', String(i));
+    btn.title = seg.text;
 
     const dot = document.createElement('span');
     dot.className = 'segment-dot';
-    dot.style.background = seg.textMode === 'rainbow'
-      ? 'linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff)'
-      : seg.textStart;
+    dot.style.background = modeDotBg(seg.textMode, seg.textStart);
     btn.appendChild(dot);
 
     const label = document.createElement('span');
@@ -628,251 +918,746 @@ function renderSegmentTabs() {
     btn.appendChild(label);
 
     if (seg.text) {
-      const text = document.createElement('span');
-      text.className = 'segment-text';
-      text.textContent = seg.text.length > 12 ? seg.text.slice(0, 12) + '…' : seg.text;
-      btn.appendChild(text);
+      const t = document.createElement('span');
+      t.className = 'segment-text';
+      t.textContent = seg.text.length > 12 ? seg.text.slice(0, 12) + '…' : seg.text;
+      btn.appendChild(t);
     }
 
-    btn.title = seg.text;
+    if (state.segments.length > 1) {
+      const del = document.createElement('span');
+      del.className = 'segment-del';
+      del.title = dict.deleteSegment;
+      del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      del.addEventListener('click', e => {
+        e.stopPropagation();
+        removeSegment(i);
+      });
+      btn.appendChild(del);
+    }
+
     btn.addEventListener('click', () => selectSegment(i));
-    segmentTabs.appendChild(btn);
+    el.segmentChips.appendChild(btn);
   });
 }
 
 function selectSegment(i) {
-  if (i === activeSegment || i < 0 || i >= segments.length) return;
-  readControlsToSegment(activeSegment);
-  activeSegment = i;
-  loadSegmentToControls(i);
-  updateOutput();
+  if (i === state.active || i < 0 || i >= state.segments.length) return;
+  readControlsToActive();
+  state.active = i;
+  syncControls();
+  renderOutput(false);
+  renderSegmentChips();
+  savePersist();
 }
 
-// ===== 输出渲染 =====
-function renderOutput() {
-  const full = segments.map(buildSegmentHtml).join('');
-  const previewHtml = segments.map(buildSegmentPreviewHtml).join('');
-  previewRender.innerHTML = previewHtml || '&nbsp;';
-  codeContent.textContent = full;
+function removeSegment(i) {
+  const parts = splitText(state.text);
+  if (parts.length <= 1) return;
+  pushHistory();
+  parts.splice(i, 1);
+  state.text = parts.join('||');
+  el.textInput.value = state.text;
+  state.active = clamp(state.active, 0, parts.length - 1);
+  syncControls();
+  renderAll(true);
 }
 
-function updateOutput() {
-  const parts = splitText(textInput.value);
-  reconcileSegments(parts);
-
-  if (activeSegment >= segments.length) {
-    activeSegment = segments.length - 1;
-    loadSegmentToControls(activeSegment);
-  }
-
-  renderSegmentTabs();
-  renderOutput();
-  updateGradientPreview('text');
-  updateGradientPreview('stroke');
-  charCount.textContent = textInput.value.length;
+function applyTextChange() {
+  beginContinuous();
+  state.text = el.textInput.value.slice(0, MAX_TEXT_LEN);
+  el.textInput.value = state.text;
+  flushContinuous();
+  renderAll(true);
 }
 
-// ===== 应用预设 =====
-function applyPreset(name) {
-  const p = PRESETS[name];
+/* ================= 预设 ================= */
+
+function renderPresets() {
+  el.presetGrid.innerHTML = '';
+  Object.entries(PRESETS).forEach(([key, p]) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'preset-btn';
+    btn.dataset.preset = key;
+    btn.title = p.text;
+
+    const preview = document.createElement('span');
+    preview.className = 'preset-preview';
+    preview.innerHTML = buildSegmentPreviewHtml(makeSegment(p.text, p)) || '&nbsp;';
+    btn.appendChild(preview);
+
+    const name = document.createElement('span');
+    name.className = 'preset-name';
+    name.textContent = p.name;
+    btn.appendChild(name);
+
+    btn.addEventListener('click', () => applyPreset(key));
+    el.presetGrid.appendChild(btn);
+  });
+}
+
+function applyPreset(key) {
+  const p = PRESETS[key];
   if (!p) return;
-  textInput.value = p.text;
-  segments = [Object.assign({}, defaultSegment(), p, { text: p.text })];
-  activeSegment = 0;
-  loadSegmentToControls(0);
-  updateOutput();
+  pushHistory();
+  state.text = p.text;
+  state.segments = [makeSegment(p.text, p)];
+  state.active = 0;
+  el.textInput.value = p.text;
+  syncControls();
+  renderAll(true);
+  fitPreview();
 }
 
-// ===== 复制 =====
-function copyCode() {
-  const code = codeContent.textContent;
-  const dict = I18N[currentLang];
-  const okMsg = currentLang === 'zh' ? '✅ 已复制' : '✅ Copied';
-  navigator.clipboard.writeText(code).then(() => {
-    copyBtn.innerHTML = okMsg;
-    setTimeout(() => {
-      copyBtn.innerHTML = dict.copyBtn;
-    }, 1500);
-  }).catch(() => {
-    const textarea = document.createElement('textarea');
-    textarea.value = code;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textarea);
-    alert(okMsg);
+/* ================= 字体选择器 ================= */
+
+function setCurrentFont(family) {
+  const f = FONT_LIST.find(x => x.family === family);
+  const label = f ? f.label : family;
+  el.fontCurrentName.textContent = label;
+  el.fontCurrentName.dataset.family = family;
+  el.fontCurrentSample.style.fontFamily = `'${family}', 'Segoe UI', sans-serif`;
+  preloadFontFamily(family);
+  updateFontListUI();
+}
+
+function updateFontListUI() {
+  const current = el.fontCurrentName.dataset.family;
+  $$('.font-item', el.fontList).forEach(item => {
+    item.classList.toggle('selected', item.dataset.family === current);
   });
 }
 
-// ===== 重置 =====
-function resetAll() {
-  textInput.value = 'ENDURANCE';
-  segments = [Object.assign({}, defaultSegment(), { text: 'ENDURANCE' })];
-  activeSegment = 0;
-  loadSegmentToControls(0);
-  updateOutput();
-}
+function renderFontList(filter) {
+  const q = (filter || '').trim().toLowerCase();
+  const dict = I18N[state.lang];
+  el.fontList.innerHTML = '';
+  visibleFontItems = [];
+  highlightIndex = -1;
 
-// ===== 语言切换 =====
-function setLanguage(lang) {
-  currentLang = lang;
-  const dict = I18N[lang];
+  const match = f => !q ||
+    f.label.toLowerCase().includes(q) ||
+    f.family.toLowerCase().includes(q);
 
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (dict[key] !== undefined) {
-      el.textContent = dict[key];
+  const groups = q
+    ? [null]
+    : ['popular', 'all'];
+
+  groups.forEach(g => {
+    let items = g === 'popular'
+      ? FONT_LIST.filter(f => f.popular && match(f))
+      : g === 'all'
+        ? FONT_LIST.filter(f => !f.popular && match(f))
+        : FONT_LIST.filter(match);
+
+    if (g === 'popular') {
+      items = items.sort((a, b) => a.label.localeCompare(b.label));
     }
-  });
 
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    const key = el.getAttribute('data-i18n-placeholder');
-    if (dict[key] !== undefined) {
-      el.placeholder = dict[key];
+    if (!items.length) return;
+
+    if (g) {
+      const label = document.createElement('div');
+      label.className = 'font-group-label';
+      label.textContent = g === 'popular' ? dict.popularFonts : dict.allFonts;
+      el.fontList.appendChild(label);
     }
+
+    items.forEach(f => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'font-item';
+      item.dataset.family = f.family;
+      item.setAttribute('role', 'option');
+
+      const sample = document.createElement('span');
+      sample.className = 'fi-sample';
+      sample.style.fontFamily = `'${f.family}', 'Segoe UI', sans-serif`;
+      sample.textContent = 'Aa';
+      item.appendChild(sample);
+
+      const name = document.createElement('span');
+      name.className = 'fi-name';
+      name.textContent = f.label;
+      item.appendChild(name);
+
+      const check = document.createElement('span');
+      check.className = 'fi-check';
+      check.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      item.appendChild(check);
+
+      item.addEventListener('mouseenter', () => preloadFontFamily(f.family));
+      item.addEventListener('click', () => {
+        selectFont(f.family);
+        closeFontPicker();
+      });
+
+      el.fontList.appendChild(item);
+      visibleFontItems.push(item);
+    });
   });
 
-  if (langLabel) {
-    langLabel.textContent = dict.langLabel || (lang === 'zh' ? '中文' : 'English');
+  if (!visibleFontItems.length) {
+    const empty = document.createElement('div');
+    empty.className = 'font-group-label';
+    empty.style.padding = '16px';
+    empty.textContent = '—';
+    el.fontList.appendChild(empty);
   }
 
-  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-
-  try {
-    localStorage.setItem('preferredLang', lang);
-  } catch (e) {}
-
-  refreshColorModeUI('text');
-  refreshColorModeUI('stroke');
-  renderSegmentTabs();
+  updateFontListUI();
 }
 
-function toggleLanguage() {
-  const nextLang = currentLang === 'zh' ? 'en' : 'zh';
-  if (langToggle) {
-    langToggle.style.transition = 'transform 0.15s cubic-bezier(0.2, 0, 0, 1)';
-    langToggle.style.transform = 'scale(0.92)';
-    setTimeout(() => {
-      langToggle.style.transform = 'scale(1)';
-    }, 150);
+function selectFont(family) {
+  pushHistory();
+  el.fontCurrentName.dataset.family = family;
+  setCurrentFont(family);
+  readControlsToActive();
+  renderOutput(true);
+  savePersist();
+}
+
+function openFontPicker() {
+  el.fontDropdown.hidden = false;
+  el.fontPicker.classList.add('open');
+  el.fontPickerBtn.setAttribute('aria-expanded', 'true');
+  el.fontSearch.value = '';
+  renderFontList('');
+  positionFontDropdown();
+  setTimeout(() => el.fontSearch.focus(), 30);
+}
+
+function closeFontPicker() {
+  el.fontDropdown.hidden = true;
+  el.fontPicker.classList.remove('open');
+  el.fontPickerBtn.setAttribute('aria-expanded', 'false');
+  el.fontSearch.blur();
+}
+
+/* 下拉面板用 fixed 定位（面板 overflow:hidden 不会裁剪），跟随按钮位置 */
+function positionFontDropdown() {
+  const btn = el.fontPickerBtn;
+  const dd = el.fontDropdown;
+  const rect = btn.getBoundingClientRect();
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  if (vw <= 560) {
+    dd.style.left = '14px';
+    dd.style.width = (vw - 28) + 'px';
+    dd.style.top = 'auto';
+    dd.style.bottom = '14px';
+    dd.style.maxHeight = Math.round(vh * 0.6) + 'px';
+    el.fontList.style.maxHeight = Math.round(vh * 0.6 - 62) + 'px';
+    return;
   }
-  setLanguage(nextLang);
-}
 
-// ===== 事件绑定 =====
+  const width = Math.max(rect.width, 300);
+  dd.style.width = width + 'px';
+  dd.style.left = Math.max(10, Math.min(rect.left, vw - width - 14)) + 'px';
 
-// 文本输入（含字数限制）
-textInput.addEventListener('input', () => {
-  if (textInput.value.length > 50) {
-    textInput.value = textInput.value.slice(0, 50);
+  const below = vh - rect.bottom - 12;
+  const above = rect.top - 12;
+  const openUp = below < 300 && above > below;
+  dd.style.maxHeight = Math.min(372, Math.max(160, openUp ? above : below)) + 'px';
+  el.fontList.style.maxHeight = (Math.min(372, Math.max(160, openUp ? above : below)) - 62) + 'px';
+
+  if (openUp) {
+    dd.style.top = 'auto';
+    dd.style.bottom = (vh - rect.top + 8) + 'px';
+  } else {
+    dd.style.top = (rect.bottom + 8) + 'px';
+    dd.style.bottom = 'auto';
   }
-  updateOutput();
-});
+}
 
-// 颜色选择器与 HEX 输入同步
-function bindColorPair(pickerId, hexId) {
-  const picker = document.getElementById(pickerId);
-  const hex = document.getElementById(hexId);
-  picker.addEventListener('input', () => {
-    hex.value = picker.value;
-    readControlsToSegment(activeSegment);
-    updateOutput();
-  });
-  hex.addEventListener('input', () => {
-    if (/^#[0-9a-f]{6}$/i.test(hex.value)) {
-      picker.value = hex.value;
-      readControlsToSegment(activeSegment);
-      updateOutput();
-    }
+function moveHighlight(delta) {
+  if (!visibleFontItems.length) return;
+  highlightIndex = (highlightIndex + delta + visibleFontItems.length) % visibleFontItems.length;
+  visibleFontItems.forEach((item, i) => {
+    item.classList.toggle('highlight', i === highlightIndex);
+    if (i === highlightIndex) item.scrollIntoView({ block: 'nearest' });
   });
 }
-bindColorPair('textStartColor', 'textStartColorHex');
-bindColorPair('textMidColor', 'textMidColorHex');
-bindColorPair('textEndColor', 'textEndColorHex');
-bindColorPair('strokeStartColor', 'strokeStartColorHex');
-bindColorPair('strokeMidColor', 'strokeMidColorHex');
-bindColorPair('strokeEndColor', 'strokeEndColorHex');
 
-// 模式按钮组
-function setupModeGroup(groupId, prefix) {
-  const group = document.getElementById(groupId);
-  group.querySelectorAll('.mode-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      group.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      readControlsToSegment(activeSegment);
-      refreshColorModeUI(prefix);
-      updateOutput();
+function confirmHighlight() {
+  if (highlightIndex >= 0 && visibleFontItems[highlightIndex]) {
+    selectFont(visibleFontItems[highlightIndex].dataset.family);
+    closeFontPicker();
+  }
+}
+
+/* ================= 快速取色 / 随机 ================= */
+
+function renderSwatches() {
+  $$('.swatch-row').forEach(row => {
+    const section = row.dataset.section;
+    const list = $('.swatch-list', row);
+    list.innerHTML = '';
+    PALETTE.forEach(color => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'swatch-btn';
+      b.style.background = color;
+      b.title = color;
+      b.setAttribute('aria-label', color);
+      b.addEventListener('click', () => applySwatch(section, color));
+      list.appendChild(b);
     });
   });
 }
-setupModeGroup('textModeGroup', 'text');
-setupModeGroup('strokeModeGroup', 'stroke');
 
-// 字体
-fontSelect.addEventListener('change', () => {
-  readControlsToSegment(activeSegment);
-  applyFontSelectPreview();
-  updateOutput();
-});
+function applySwatch(section, hex) {
+  const s = state.segments[state.active];
+  if (!s) return;
+  pushHistory();
+  const mode = s[section + 'Mode'];
+  const set = (pos, v) => { s[section + pos] = v; };
 
-// 样式开关
-[optBold, optItalic, optUnderline, optStrikethrough].forEach(el => {
-  el.addEventListener('change', () => {
-    readControlsToSegment(activeSegment);
-    updateOutput();
-  });
-});
+  switch (mode) {
+    case 'solid':
+      set('Start', hex); set('Mid', hex); set('End', hex);
+      break;
+    case 'three':
+      set('Start', shade(hex, -0.18)); set('Mid', hex); set('End', shade(hex, 0.22));
+      break;
+    case 'edge':
+      set('Start', hex); set('End', shade(hex, 0.3)); set('Mid', hex);
+      break;
+    case 'rainbow':
+      set('Start', shade(hex, -0.15)); set('Mid', hex); set('End', shade(hex, 0.25));
+      break;
+    default:
+      set('Start', shade(hex, -0.12)); set('Mid', hex); set('End', shade(hex, 0.3));
+  }
 
-// 描边启用
-optStroke.addEventListener('change', () => {
-  readControlsToSegment(activeSegment);
-  setStrokeAreaEnabled(optStroke.checked);
-  updateOutput();
-});
-
-// 描边参数
-strokeThickness.addEventListener('input', () => {
-  strokeThicknessVal.textContent = strokeThickness.value;
-  readControlsToSegment(activeSegment);
-  updateOutput();
-});
-strokeTransparency.addEventListener('input', () => {
-  strokeTransparencyVal.textContent = strokeTransparency.value;
-  readControlsToSegment(activeSegment);
-  updateOutput();
-});
-
-// 预设按钮
-document.querySelectorAll('.preset-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    applyPreset(this.dataset.preset);
-  });
-});
-
-// 复制 / 重置
-copyBtn.addEventListener('click', copyCode);
-resetBtn.addEventListener('click', resetAll);
-
-// 语言切换
-if (langToggle) {
-  langToggle.addEventListener('click', toggleLanguage);
+  syncControls();
+  renderOutput(true);
+  savePersist();
 }
 
-// ===== 初始化 =====
-(function init() {
-  let savedLang = 'zh';
-  try {
-    const stored = localStorage.getItem('preferredLang');
-    if (stored === 'en' || stored === 'zh') {
-      savedLang = stored;
+function randomizeColors() {
+  const s = state.segments[state.active];
+  if (!s) return;
+
+  pushHistory();
+  const hue = Math.random() * 360;
+  const roll = Math.random();
+  s.textMode = roll < 0.5 ? 'gradient' : roll < 0.75 ? 'three' : 'edge';
+  s.textStart = hslToHex(hue, 0.75, 0.52);
+  s.textMid = hslToHex(hue + 35, 0.85, 0.62);
+  s.textEnd = hslToHex(hue + 75, 0.9, 0.68);
+
+  syncControls();
+  renderOutput(true);
+  savePersist();
+  toast(I18N[state.lang].toastRandom);
+}
+
+/* ================= 复制 ================= */
+
+function copyText(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  }
+  return fallbackCopy(text);
+}
+
+function fallbackCopy(text) {
+  return new Promise((resolve, reject) => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error('execCommand failed'));
+    } catch (err) { reject(err); }
+  });
+}
+
+function copyCode() {
+  const code = el.codeContent.textContent;
+  const dict = I18N[state.lang];
+  if (!code) {
+    toast(dict.toastEmpty, 'error');
+    return;
+  }
+  copyText(code).then(() => {
+    toast(dict.toastCopied);
+    flashCopySuccess(el.copyBtn);
+    flashCopySuccess(el.codeCopyBtn);
+  }).catch(() => {
+    toast(dict.toastCopyFail, 'error');
+  });
+}
+
+let copyFlashTimer = null;
+function flashCopySuccess(btn) {
+  if (!btn) return;
+  btn.classList.add('success');
+  if (btn === el.copyBtn) {
+    const label = $('span', btn);
+    if (label) label.textContent = I18N[state.lang].copiedBtn;
+  }
+  clearTimeout(copyFlashTimer);
+  copyFlashTimer = setTimeout(() => {
+    btn.classList.remove('success');
+    if (btn === el.copyBtn) {
+      const label = $('span', btn);
+      if (label) label.textContent = I18N[state.lang].copyBtn;
     }
-  } catch (e) {}
+  }, 1600);
+}
 
-  segments = [Object.assign({}, defaultSegment(), { text: textInput.value || 'ENDURANCE' })];
-  activeSegment = 0;
+/* ================= 重置 ================= */
 
-  setLanguage(savedLang);
-  loadSegmentToControls(0);
-  updateOutput();
+function resetAll() {
+  pushHistory();
+  state.text = 'ENDURANCE';
+  state.segments = [makeSegment('ENDURANCE')];
+  state.active = 0;
+  el.textInput.value = state.text;
+  syncControls();
+  renderAll(true);
+  toast(I18N[state.lang].toastReset);
+}
+
+/* ================= 预览自适应缩放 ================= */
+
+const fitPreview = debounce(() => {
+  const stage = el.previewContainer;
+  const render = el.previewRender;
+  if (!stage || !render) return;
+
+  el.previewInner.style.transform = 'none';
+  const avail = stage.clientWidth - 44;
+  if (!avail) return;
+
+  /* 以单行宽度测量，决定缩放或换行 */
+  render.style.whiteSpace = 'nowrap';
+  const natural = render.scrollWidth;
+  const s = Math.min(1, avail / natural);
+
+  if (s < 0.42) {
+    /* 过长：恢复换行，不缩放 */
+    render.style.whiteSpace = '';
+    el.previewInner.style.transform = '';
+    return;
+  }
+  el.previewInner.style.transform = s < 1 ? `scale(${s})` : '';
+}, 60);
+
+/* ================= i18n ================= */
+
+function setLanguage(lang) {
+  state.lang = lang;
+  const dict = I18N[lang];
+
+  $$('[data-i18n]').forEach(elx => {
+    const key = elx.getAttribute('data-i18n');
+    if (dict[key] !== undefined) elx.textContent = dict[key];
+  });
+  $$('[data-i18n-title]').forEach(elx => {
+    const key = elx.getAttribute('data-i18n-title');
+    if (dict[key] !== undefined) elx.title = dict[key];
+  });
+  $$('[data-i18n-placeholder]').forEach(elx => {
+    const key = elx.getAttribute('data-i18n-placeholder');
+    if (dict[key] !== undefined) elx.placeholder = dict[key];
+  });
+
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  el.langSwitch.dataset.active = lang;
+  $$('.lang-opt').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+
+  refreshColorUI('text');
+  refreshColorUI('stroke');
+  refreshStrokeState();
+  renderSegmentChips();
+  renderFontList(el.fontSearch.value);
+  updateSummaries();
+  updateCharCount();
+  savePersist();
+}
+
+function switchLanguage(lang) {
+  if (lang === state.lang) return;
+  setLanguage(lang);
+}
+
+/* ================= 事件绑定 ================= */
+
+/* 文本输入 */
+el.textInput.addEventListener('input', applyTextChange);
+
+el.inputClear.addEventListener('click', () => {
+  el.textInput.value = '';
+  applyTextChange();
+  el.textInput.focus();
+});
+
+/* 颜色绑定 */
+function bindColorPair(pickerId, hexId) {
+  const picker = el[pickerId];
+  const hex = el[hexId];
+  const cover = document.querySelector(`.swatch[data-for="${pickerId}"] .swatch-cover`);
+
+  picker.addEventListener('input', () => {
+    hex.value = picker.value;
+    if (cover) cover.style.background = picker.value;
+    commitColorChange();
+  });
+
+  hex.addEventListener('input', () => {
+    if (/^#[0-9a-f]{6}$/i.test(hex.value)) {
+      hex.value = hex.value.toUpperCase();
+      picker.value = hex.value;
+      if (cover) cover.style.background = hex.value;
+      hex.classList.remove('invalid');
+      commitColorChange();
+    } else {
+      hex.classList.add('invalid');
+    }
+  });
+
+  hex.addEventListener('blur', () => {
+    if (!/^#[0-9a-f]{6}$/i.test(hex.value)) {
+      hex.value = picker.value;
+      hex.classList.remove('invalid');
+    }
+  });
+
+  hex.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      hex.blur();
+      e.preventDefault();
+    }
+  });
+}
+
+function commitColorChange() {
+  beginContinuous();
+  readControlsToActive();
+  updateGradientPreview('text');
+  updateGradientPreview('stroke');
+  updateSummaries();
+  flushContinuous();
+  renderOutput(true);
+  savePersist();
+}
+
+['Start', 'Mid', 'End'].forEach(pos => {
+  bindColorPair('text' + pos + 'Color', 'text' + pos + 'ColorHex');
+  bindColorPair('stroke' + pos + 'Color', 'stroke' + pos + 'ColorHex');
+});
+
+/* 模式按钮 */
+function setupModeGroup(group, prefix) {
+  group.addEventListener('click', e => {
+    const btn = e.target.closest('.mode-btn');
+    if (!btn || btn.classList.contains('active')) return;
+    pushHistory();
+    setModeOnGroup(group, btn.dataset.mode);
+    refreshColorUI(prefix);
+    readControlsToActive();
+    renderOutput(true);
+    updateSummaries();
+    savePersist();
+  });
+}
+setupModeGroup(el.textModeGroup, 'text');
+setupModeGroup(el.strokeModeGroup, 'stroke');
+
+/* 描边开关 */
+el.optStroke.addEventListener('change', () => {
+  pushHistory();
+  readControlsToActive();
+  refreshStrokeState();
+  renderOutput(true);
+  updateSummaries();
+  savePersist();
+});
+
+/* 滑杆（连续变化合并历史） */
+function bindSlider(input, valEl) {
+  input.addEventListener('input', () => {
+    beginContinuous();
+    valEl.textContent = formatNum(parseFloat(input.value));
+    updateSliderFill(input);
+    readControlsToActive();
+    flushContinuous();
+    renderOutput(true);
+    savePersist();
+  });
+}
+bindSlider(el.strokeThickness, el.strokeThicknessVal);
+bindSlider(el.strokeTransparency, el.strokeTransparencyVal);
+
+/* 样式芯片 */
+$$('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    pushHistory();
+    const on = chip.getAttribute('aria-pressed') !== 'true';
+    chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+    readControlsToActive();
+    renderOutput(true);
+    savePersist();
+  });
+});
+
+/* 字体选择器 */
+el.fontPickerBtn.addEventListener('click', () => {
+  el.fontDropdown.hidden ? openFontPicker() : closeFontPicker();
+});
+
+el.fontSearch.addEventListener('input', () => renderFontList(el.fontSearch.value));
+el.fontSearch.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown') { e.preventDefault(); moveHighlight(1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); moveHighlight(-1); }
+  else if (e.key === 'Enter') { e.preventDefault(); confirmHighlight(); }
+  else if (e.key === 'Escape') { e.stopPropagation(); closeFontPicker(); el.fontPickerBtn.focus(); }
+});
+
+document.addEventListener('pointerdown', e => {
+  if (!el.fontDropdown.hidden &&
+      !el.fontPicker.contains(e.target) &&
+      !el.fontDropdown.contains(e.target)) {
+    closeFontPicker();
+  }
+});
+
+/* 面板折叠 */
+$$('.panel-toggle').forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    const panel = toggle.closest('.panel');
+    const key = panel.id.replace('panel', '').toLowerCase();
+    const closed = !panel.classList.contains('closed');
+    panel.classList.toggle('closed', closed);
+    state.collapsed[key] = closed;
+    toggle.setAttribute('aria-expanded', closed ? 'false' : 'true');
+    if (!closed) {
+      setTimeout(() => {
+        updateModeThumb($('.mode-seg', panel));
+      }, 360);
+    }
+    savePersist();
+  });
+});
+
+/* 语言切换 */
+$$('.lang-opt').forEach(btn => {
+  btn.addEventListener('click', () => switchLanguage(btn.dataset.lang));
+});
+
+/* 复制 / 重置 / 撤销 / 重做 / 随机 */
+el.copyBtn.addEventListener('click', copyCode);
+el.codeCopyBtn.addEventListener('click', copyCode);
+el.resetBtn.addEventListener('click', resetAll);
+el.undoBtn.addEventListener('click', undo);
+el.redoBtn.addEventListener('click', redo);
+el.randomBtn.addEventListener('click', randomizeColors);
+
+/* 键盘快捷键 */
+document.addEventListener('keydown', e => {
+  const mod = e.ctrlKey || e.metaKey;
+  if (!mod) return;
+  const key = e.key.toLowerCase();
+
+  if (key === 'z' && !e.shiftKey) {
+    e.preventDefault();
+    undo();
+  } else if ((key === 'z' && e.shiftKey) || key === 'y') {
+    e.preventDefault();
+    redo();
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    copyCode();
+  } else if (/^[1-9]$/.test(e.key)) {
+    const idx = parseInt(e.key, 10) - 1;
+    if (idx < state.segments.length) {
+      e.preventDefault();
+      selectSegment(idx);
+    }
+  }
+});
+
+/* 窗口尺寸变化 */
+window.addEventListener('resize', () => {
+  updateModeThumb(el.textModeGroup);
+  updateModeThumb(el.strokeModeGroup);
+  fitPreview();
+  if (!el.fontDropdown.hidden) positionFontDropdown();
+});
+
+/* 控制列滚动时收起字体下拉（避免错位） */
+el.controlsScroll.addEventListener('scroll', () => {
+  if (!el.fontDropdown.hidden) closeFontPicker();
+}, { passive: true });
+
+/* 面板展开后重算滑块（transitionend 兜底） */
+document.addEventListener('transitionend', e => {
+  if (e.target.classList && e.target.classList.contains('panel-body')) {
+    const panel = e.target.closest('.panel');
+    if (panel && !panel.classList.contains('closed')) {
+      updateModeThumb($('.mode-seg', panel));
+    }
+  }
+});
+
+/* ================= 初始化 ================= */
+
+(function init() {
+  /* 将字体下拉传送到 <body>：
+     面板的 backdrop-filter/transform 会改变 fixed 定位的包含块并裁剪下拉面板 */
+  document.body.appendChild(el.fontDropdown);
+
+  renderSwatches();
+  renderPresets();
+
+  const persisted = loadPersist();
+  if (persisted) {
+    state.text = persisted.text;
+    state.segments = persisted.segments;
+    state.active = clamp(persisted.active, 0, state.segments.length - 1);
+    state.lang = persisted.lang === 'en' ? 'en' : 'zh';
+    state.collapsed = persisted.collapsed || {};
+    el.textInput.value = state.text;
+  } else {
+    el.textInput.value = state.text;
+  }
+
+  /* 移动端默认折叠部分面板（仅当用户未保存过偏好） */
+  if (!persisted && window.matchMedia('(max-width: 960px)').matches) {
+    state.collapsed = { color: false, stroke: true, font: true };
+  }
+
+  setLanguage(state.lang);
+  syncControls();
+  updateSliderFill(el.strokeThickness);
+  updateSliderFill(el.strokeTransparency);
+  updateUndoButtons();
+  renderAll(false);
+  firstRenderDone = true;
+
+  /* 字体就绪后淡入预览并重新适配 */
+  let ready = false;
+  const markReady = () => {
+    if (ready) return;
+    ready = true;
+    document.body.classList.add('ready');
+    fitPreview();
+  };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(markReady);
+  }
+  setTimeout(markReady, 900);
+
+  /* 吸顶预览阴影强化（滚动时） */
+  el.stageScroll.addEventListener('scroll', () => {
+    el.previewCard.classList.toggle('scrolled', el.stageScroll.scrollTop > 4);
+  }, { passive: true });
 })();
